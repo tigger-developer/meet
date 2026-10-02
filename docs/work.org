@@ -1,8 +1,132 @@
-#+TITLE: Legacy acceptance criteria
-#+DATE: 2026-10-02
-#+OPTIONS: toc:3 num:nil
+#+TITLE: Project Work Ledger
+#+STARTUP: overview
+#+TODO: TODO ACTIVE BLOCKED REVIEW | DONE ABANDONED
+#+TYP_TODO: PENDING FAILING SUPERSEDED | VALID ASSUMED_PASS
+#+TAGS: feature defect maintenance migration legacy
+#+OPTIONS: toc:2 num:nil
 
-* Ledger authority
+This is the project's canonical work and requirements index. Each fact has one
+authoritative representation:
+
+- *Current lifecycle state* :: The TODO keyword on the work-item headline.
+- *Classification* :: One or more tags on that headline.
+- *Stable metadata* :: The work item's property drawer.
+- *Current definition* :: The linked =spec.org= file.
+- *Evidence* :: The linked =audits.yaml= and =validation.org= files.
+- *History* :: Git history and explicitly linked archived sources.
+
+Do not repeat lifecycle state in a property, section, specification, or evidence
+file. Work items remain under one heading when their state changes. Use one
+monotonically increasing project-wide work number and never reuse an identifier,
+including after abandonment, deletion, retirement, or archival.
+
+* Ledger vocabulary
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+
+The file directives declare the permitted TODO states and standard tags. This
+section defines their meanings.
+
+** Lifecycle states
+
+- =TODO= :: Defined but not started.
+- =ACTIVE= :: Delivery is underway.
+- =BLOCKED= :: Delivery cannot continue because of a named external dependency.
+- =REVIEW= :: Human review, validation, or disposition is required.
+- =DONE= :: Delivered, verified, and closed.
+- =ABANDONED= :: Deliberately not delivered. Its identifiers remain reserved.
+
+** Legacy requirement states
+
+- =PENDING= :: The requirement or some required evidence remains unverified.
+- =FAILING= :: Current evidence shows that the requirement does not hold.
+- =SUPERSEDED= :: A named later requirement replaces or retires it.
+- =VALID= :: The legacy requirement remains applicable. Test outcomes are
+  recorded separately; this label does not assert a test pass or mean blocked.
+- =ASSUMED_PASS= :: Migration inferred delivery under a recorded heuristic; it
+  is not a contemporaneous test result.
+
+** Standard tags
+
+- =feature= :: New or changed product behaviour.
+- =defect= :: Incorrect existing behaviour.
+- =maintenance= :: Internal upkeep without intended product-behaviour change.
+- =migration= :: Historical or framework migration work.
+- =legacy= :: Material governed by an earlier delivery process. Apply it to the
+  parent headline so the whole subtree inherits the classification.
+
+Tags are non-exclusive classifications. Add a project-specific tag only when it
+provides a durable cross-cutting category that the standard tags cannot express.
+
+** Work-item structure
+
+#+begin_example
+** TODO WNNN - Concise descriptor :feature:
+:PROPERTIES:
+:CUSTOM_ID: w-nnn
+:PRIORITY: P1
+:SOURCE: operator
+:CREATED: YYYY-MM-DD
+:END:
+
+- *Specification:* [[file:../specs/WNNN-concise-descriptor/spec.org][WNNN - Concise descriptor]]
+#+end_example
+
+Use =OWNER= and =BRANCH= properties only when concurrent work needs explicit
+coordination. Use =MIGRATION_DISPOSITION= only to preserve an immutable migration
+classification; it is provenance, not current state.
+
+* Work items
+
+** TODO W002 - Chat filename uses epoch date when startTimestamp is missing :defect:legacy:
+:PROPERTIES:
+:CUSTOM_ID: w-002
+:PRIORITY: unassigned
+:SOURCE: [[file:archive/migrated-tickets/2.md][#2 - Chat filename uses epoch date when startTimestamp is missing]]
+:CREATED: unknown
+:END:
+
+**** Snapshot state
+
+Open.
+
+**** Evidence
+
+Production evidence dated 2026-06-10 records a =CHAT_UPLOADED= artefact whose missing =startTimestamp= produced a Unix-epoch filename. No delivery evidence or linked commit is recorded.
+
+**** Disposition
+
+Undelivered open defect: when =startTimestamp= is absent or zero, use the webhook =timestamp= for the chat filename.
+
+** TODO W003 - Verify transcription upload end-to-end :defect:legacy:
+:PROPERTIES:
+:CUSTOM_ID: w-003
+:PRIORITY: unassigned
+:SOURCE: [[file:archive/migrated-tickets/3.md][#3 - Verify transcription upload end-to-end]]
+:CREATED: unknown
+:END:
+
+**** Snapshot state
+
+Open.
+
+**** Evidence
+
+Production verification dated 2026-06-10 produced recording and chat artefacts but no transcription artefact. UT-1.2 - live transcription delivery therefore remains PENDING.
+
+**** Disposition
+
+Undelivered open defect: live transcription delivery and speaker attribution remain unverified.
+
+* Legacy Acceptance Criteria (SDLC v1) :legacy:
+:PROPERTIES:
+:CUSTOM_ID: legacy-acceptance-criteria
+:VISIBILITY: folded
+:SOURCE_DATE: 2026-10-02
+:END:
+
+** Legacy ledger authority at migration
 
 Until v3 project initialization, this file is the sole authoritative record of
 requirements established under the legacy ticket-led process, including current
@@ -15,7 +139,8 @@ The migration index and archived tickets retain disposition, provenance, and
 rationale only. Ticket bodies and comments are not current requirement or AC
 authorities.
 
-* Status vocabulary
+
+** Legacy status vocabulary at migration
 
 - *VALID:* The legacy requirement remains applicable. Test outcomes are recorded
   separately; this label does not assert a test pass or mean blocked.
@@ -28,11 +153,10 @@ authorities.
 Recorded test results are the legacy ledger status marks translated to words:
 =PASS=, =PENDING=, =FAIL=, and =SUPERSEDED= (for removed tests).
 
-* Acceptance criteria
 
 ** Recording, transcription, and chat archival
 
-*** AC1.1 - Recording appears in the configured Nextcloud WebDAV share
+*** SUPERSEDED AC1.1 - Recording appears in the configured Nextcloud WebDAV share
 
 **** Requirement
 
@@ -42,17 +166,16 @@ After a recorded meeting ends, the recording file appears in the configured Next
 
 - *Introduced by:* [[file:archive/migrated-tickets/1.md][#1 - Download recordings, transcriptions, and chat logs at end of session]] (closed 2026-04-30)
 
-**** Status
+**** Status qualification
 
-SUPERSEDED - AC6.1 - Recording uploads automatically to Cloudflare Stream replaces the WebDAV destination for video recordings.
-
+AC6.1 - Recording uploads automatically to Cloudflare Stream replaces the WebDAV destination for video recordings.
 **** Tests
 
 - *RT-1.1 - Valid RECORDING_UPLOADED webhook triggers download and upload to WebDAV:* *PASS*.
 - *RT-1.2 - Recording file at the WebDAV destination has the expected content:* *PASS*.
 - *UT-1.1 - End-to-end: record a meeting and verify the recording appears in Nextcloud:* *PASS*.
 
-*** AC1.2 - Transcription appears in the configured Nextcloud WebDAV share
+*** PENDING AC1.2 - Transcription appears in the configured Nextcloud WebDAV share
 
 **** Requirement
 
@@ -62,17 +185,16 @@ After a transcribed meeting ends, the transcription file appears in the configur
 
 - *Introduced by:* [[file:archive/migrated-tickets/1.md][#1 - Download recordings, transcriptions, and chat logs at end of session]] (closed 2026-04-30)
 
-**** Status
+**** Status qualification
 
-PENDING - regression evidence is recorded, but live transcription delivery remains unverified; see #3 - Verify transcription upload end-to-end.
-
+regression evidence is recorded, but live transcription delivery remains unverified; see #3 - Verify transcription upload end-to-end.
 **** Tests
 
 - *RT-1.3 - Valid TRANSCRIPTION_UPLOADED webhook triggers download and upload to WebDAV:* *PASS*.
 - *RT-1.4 - Transcription file at the WebDAV destination has the expected content:* *PASS*.
 - *UT-1.2 - End-to-end: record a meeting with transcription and verify the transcript appears in Nextcloud:* *PENDING*. Production verification on 2026-06-10 produced no transcription artefact.
 
-*** AC1.3 - Chat log appears in the configured Nextcloud WebDAV share
+*** VALID AC1.3 - Chat log appears in the configured Nextcloud WebDAV share
 
 **** Requirement
 
@@ -82,17 +204,13 @@ After a meeting with chat ends, the chat log appears in the configured Nextcloud
 
 - *Introduced by:* [[file:archive/migrated-tickets/1.md][#1 - Download recordings, transcriptions, and chat logs at end of session]] (closed 2026-04-30)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-1.5 - Valid CHAT_UPLOADED webhook triggers download and upload to WebDAV:* *PASS*.
 - *RT-1.6 - Chat file at the WebDAV destination has the expected content:* *PASS*.
 - *UT-1.3 - End-to-end: chat during a meeting and verify the chat log appears in Nextcloud:* *PASS*.
 
-*** AC1.4 - Downloaded filenames identify room, date, duration, and type
+*** VALID AC1.4 - Downloaded filenames identify room, date, duration, and type
 
 **** Requirement
 
@@ -102,10 +220,6 @@ Downloaded filenames identify the room, date, duration, and type.
 
 - *Introduced by:* [[file:archive/migrated-tickets/1.md][#1 - Download recordings, transcriptions, and chat logs at end of session]] (closed 2026-04-30)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-1.7 - Recording filename follows ={room}_{YYYY-MM-DD}_{HHmm}_{duration}s.mp4=*: *PASS*.
@@ -113,7 +227,7 @@ VALID
 - *RT-1.9 - Chat filename follows ={room}_{YYYY-MM-DD}_{HHmm}_chat.{ext}=*: *PASS*.
 - *RT-1.10 - Room name is extracted correctly from the =fqn= field:* *PASS*.
 
-*** AC1.5 - Duplicate webhook deliveries produce no duplicate files
+*** VALID AC1.5 - Duplicate webhook deliveries produce no duplicate files
 
 **** Requirement
 
@@ -123,16 +237,12 @@ Duplicate webhook deliveries do not produce duplicate files.
 
 - *Introduced by:* [[file:archive/migrated-tickets/1.md][#1 - Download recordings, transcriptions, and chat logs at end of session]] (closed 2026-04-30)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-1.11 - A second delivery with the same idempotencyKey does not re-download or re-upload:* *PASS*.
 - *RT-1.12 - Deduplication survives rapid repeated delivery:* *PASS*.
 
-*** AC1.6 - Failed download or upload does not crash or block the server
+*** VALID AC1.6 - Failed download or upload does not crash or block the server
 
 **** Requirement
 
@@ -142,17 +252,13 @@ A failed download or upload does not crash the server or block other requests.
 
 - *Introduced by:* [[file:archive/migrated-tickets/1.md][#1 - Download recordings, transcriptions, and chat logs at end of session]] (closed 2026-04-30)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-1.13 - Download failure is logged and the server continues serving:* *PASS*.
 - *RT-1.14 - Upload failure is logged and the server continues serving:* *PASS*.
 - *RT-1.15 - Webhook endpoint responds promptly regardless of file size:* *PASS*.
 
-*** AC1.7 - Feature remains inactive without WebDAV credentials
+*** VALID AC1.7 - Feature remains inactive without WebDAV credentials
 
 **** Requirement
 
@@ -162,16 +268,12 @@ The feature is inactive when WebDAV credentials are not configured; the server s
 
 - *Introduced by:* [[file:archive/migrated-tickets/1.md][#1 - Download recordings, transcriptions, and chat logs at end of session]] (closed 2026-04-30)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-1.16 - Server starts without WebDAV configuration:* *PASS*.
 - *RT-1.17 - Webhook endpoint returns an appropriate error when WebDAV is not configured:* *PASS*.
 
-*** AC1.8 - Webhook endpoint rejects unauthorized requests
+*** VALID AC1.8 - Webhook endpoint rejects unauthorized requests
 
 **** Requirement
 
@@ -181,17 +283,13 @@ The webhook endpoint validates an authorization header to reject unauthorized PO
 
 - *Introduced by:* [[file:archive/migrated-tickets/1.md][#1 - Download recordings, transcriptions, and chat logs at end of session]] (closed 2026-04-30)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-1.18 - Request with a valid authorization header is accepted:* *PASS*.
 - *RT-1.19 - Request with a missing authorization header is rejected with 401:* *PASS*.
 - *RT-1.20 - Request with a wrong authorization header is rejected with 401:* *PASS*.
 
-*** AC1.9 - All authenticated webhook events are logged
+*** VALID AC1.9 - All authenticated webhook events are logged
 
 **** Requirement
 
@@ -201,10 +299,6 @@ All authenticated webhook events are logged with event type, room, session ID, a
 
 - *Introduced by:* [[file:archive/migrated-tickets/1.md][#1 - Download recordings, transcriptions, and chat logs at end of session]] (closed 2026-04-30)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-1.21 - RECORDING_UPLOADED event is logged:* *PASS*.
@@ -213,7 +307,7 @@ VALID
 
 ** Server configuration
 
-*** AC4.1 - ADDR environment variable overrides the configured address
+*** VALID AC4.1 - ADDR environment variable overrides the configured address
 
 **** Requirement
 
@@ -224,15 +318,11 @@ The server binds to the address specified by the =ADDR= environment variable whe
 - *Introduced by:* [[file:archive/migrated-tickets/4.md][#4 - ADDR env var takes precedence over addr in config]] (closed 2026-05-23)
 - *Delivery evidence:* Commit =996ae457f4048e77d1e04a447f3ba123a79e2396= is linked from the ticket.
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *UT-4.1 - Set =ADDR=127.0.0.1:19000= and confirm the server binds to that address:* *PENDING*.
 
-*** AC4.2 - Configured address applies when ADDR is unset
+*** VALID AC4.2 - Configured address applies when ADDR is unset
 
 **** Requirement
 
@@ -243,15 +333,11 @@ The server binds to =addr= from config YAML when =ADDR= is not set.
 - *Introduced by:* [[file:archive/migrated-tickets/4.md][#4 - ADDR env var takes precedence over addr in config]] (closed 2026-05-23)
 - *Delivery evidence:* Commit =996ae457f4048e77d1e04a447f3ba123a79e2396= is linked from the ticket.
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *UT-4.2 - Unset =ADDR= and confirm the server uses the config YAML address:* *PENDING*.
 
-*** AC4.3 - Hardcoded address applies when no override is configured
+*** VALID AC4.3 - Hardcoded address applies when no override is configured
 
 **** Requirement
 
@@ -262,17 +348,13 @@ The server binds to the hardcoded default (=127.0.0.1:18085=) when neither =ADDR
 - *Introduced by:* [[file:archive/migrated-tickets/4.md][#4 - ADDR env var takes precedence over addr in config]] (closed 2026-05-23)
 - *Delivery evidence:* Commit =996ae457f4048e77d1e04a447f3ba123a79e2396= is linked from the ticket.
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *UT-4.3 - Unset =ADDR=, omit config =addr=, and confirm the hardcoded default:* *PENDING*.
 
 ** Cloudflare Stream recording archival
 
-*** AC6.1 - Recording uploads automatically to Cloudflare Stream
+*** VALID AC6.1 - Recording uploads automatically to Cloudflare Stream
 
 **** Requirement
 
@@ -283,17 +365,13 @@ When a recorded meeting ends, the recording is uploaded automatically to Cloudfl
 - *Introduced by:* [[file:archive/migrated-tickets/6.md][#6 - Upload meeting video recordings to Cloudflare Stream instead of WebDAV]]
 - *Delivery evidence:* Commit =90365622652ef2658dfb5015008d33f94aa05c60= is linked from the ticket; UT-6.1 - live recording pipeline was confirmed PASS on 2026-06-10.
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-6.1 - A =RECORDING_UPLOADED= webhook causes a Cloudflare Stream upload attempt and no Nextcloud WebDAV PUT for the same file:* *PENDING*.
 - *RT-6.2 - Upload completes against a TUS-protocol fake and produces a Stream UID:* *PENDING*.
 - *RT-6.3 - A successful upload from empty state creates one =recordings.csv= row with the returned Stream UID:* *PENDING*.
 
-*** AC6.2 - Playback URL is available locally and through Nextcloud notification
+*** VALID AC6.2 - Playback URL is available locally and through Nextcloud notification
 
 **** Requirement
 
@@ -304,10 +382,6 @@ The operator can find a playback URL for a successfully uploaded recording, both
 - *Introduced by:* [[file:archive/migrated-tickets/6.md][#6 - Upload meeting video recordings to Cloudflare Stream instead of WebDAV]]
 - *Delivery evidence:* Commit =90365622652ef2658dfb5015008d33f94aa05c60= is linked from the ticket; UT-6.1 - live recording pipeline was confirmed PASS on 2026-06-10.
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-6.4 - A successful upload records timestamp, room, session ID, Stream UID, playback URL, and scheduled deletion in =recordings.csv=*: *PENDING*.
@@ -317,7 +391,7 @@ VALID
 - *RT-6.8 - A host-configured player base is reflected in both success artefacts:* *PENDING*.
 - *RT-6.9 - The notification and CSV playback URLs match for the same recording:* *PENDING*.
 
-*** AC6.3 - Cloudflare recording deletion follows the configured retention period
+*** VALID AC6.3 - Cloudflare recording deletion follows the configured retention period
 
 **** Requirement
 
@@ -328,17 +402,13 @@ Each uploaded recording is scheduled for automatic deletion from Cloudflare Stre
 - *Introduced by:* [[file:archive/migrated-tickets/6.md][#6 - Upload meeting video recordings to Cloudflare Stream instead of WebDAV]]
 - *Delivery evidence:* Commit =90365622652ef2658dfb5015008d33f94aa05c60= is linked from the ticket; UT-6.1 - live recording pipeline was confirmed PASS on 2026-06-10.
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-6.10 - The default Stream request schedules deletion at upload time plus 90 days:* *PENDING*.
 - *RT-6.11 - A configured N-day retention schedules deletion at upload time plus N days:* *PENDING*.
 - *RT-6.12 - The CSV scheduled-deletion value matches the value sent to Cloudflare:* *PENDING*.
 
-*** AC6.4 - Successful local recordings are retained temporarily and then purged
+*** VALID AC6.4 - Successful local recordings are retained temporarily and then purged
 
 **** Requirement
 
@@ -349,10 +419,6 @@ The local copy of a successfully uploaded recording is retained for a configurab
 - *Introduced by:* [[file:archive/migrated-tickets/6.md][#6 - Upload meeting video recordings to Cloudflare Stream instead of WebDAV]]
 - *Delivery evidence:* Commit =90365622652ef2658dfb5015008d33f94aa05c60= is linked from the ticket.
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-6.13 - A successful upload moves the recording from =download/= to =uploaded/=*: *PENDING*.
@@ -360,7 +426,7 @@ VALID
 - *RT-6.15 - A configured N-day retention moves the purge boundary to N days:* *PENDING*.
 - *RT-6.16 - Purge leaves files in =download/= untouched regardless of age:* *PENDING*.
 
-*** AC6.5 - Failed uploads remain recoverable and create no success artefacts
+*** VALID AC6.5 - Failed uploads remain recoverable and create no success artefacts
 
 **** Requirement
 
@@ -371,17 +437,13 @@ A failed upload preserves the recording on local disk for retry and manual recov
 - *Introduced by:* [[file:archive/migrated-tickets/6.md][#6 - Upload meeting video recordings to Cloudflare Stream instead of WebDAV]]
 - *Delivery evidence:* Commit =90365622652ef2658dfb5015008d33f94aa05c60= is linked from the ticket.
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-6.17 - A Stream HTTP 500 preserves the download, creates no success artefacts, and schedules a retry:* *PENDING*.
 - *RT-6.18 - Exhausted retries log giving up, preserve the download, and create no success artefacts:* *PENDING*.
 - *RT-6.19 - A transient failure followed by success creates exactly one CSV row and one notification:* *PENDING*.
 
-*** AC6.6 - Chat and transcription continue through WebDAV
+*** VALID AC6.6 - Chat and transcription continue through WebDAV
 
 **** Requirement
 
@@ -392,17 +454,16 @@ Chat and transcription artefacts continue to land in the configured Nextcloud sh
 - *Introduced by:* [[file:archive/migrated-tickets/6.md][#6 - Upload meeting video recordings to Cloudflare Stream instead of WebDAV]]
 - *Delivery evidence:* Commit =90365622652ef2658dfb5015008d33f94aa05c60= is linked from the ticket.
 
-**** Status
+**** Status qualification
 
-VALID, subject to the unresolved live transcription verification in #3 - Verify transcription upload end-to-end.
-
+subject to the unresolved live transcription verification in #3 - Verify transcription upload end-to-end.
 **** Tests
 
 - *RT-6.20 - =TRANSCRIPTION_UPLOADED= uses WebDAV and does not use Cloudflare Stream:* *PENDING*.
 - *RT-6.21 - =CHAT_UPLOADED= uses WebDAV and does not use Cloudflare Stream:* *PENDING*.
 - *RT-6.22 - Chat and transcription WebDAV requests remain byte-identical to the existing pipeline:* *PENDING*.
 
-*** AC6.7 - Recording pipeline settings follow the host configuration cascade
+*** VALID AC6.7 - Recording pipeline settings follow the host configuration cascade
 
 **** Requirement
 
@@ -413,10 +474,6 @@ The Cloudflare credentials, player base URL, and both retention windows are conf
 - *Introduced by:* [[file:archive/migrated-tickets/6.md][#6 - Upload meeting video recordings to Cloudflare Stream instead of WebDAV]]
 - *Delivery evidence:* Commit =90365622652ef2658dfb5015008d33f94aa05c60= is linked from the ticket.
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-6.23 - Defaults resolve the player base to =https://media.lobb.ie/=, Stream retention to 90 days, and local retention to 14 days:* *PENDING*.
@@ -424,7 +481,7 @@ VALID
 - *RT-6.25 - Secrets-layer Cloudflare credentials reach the Stream client verbatim:* *PENDING*.
 - *RT-6.26 - A missing Cloudflare account ID disables the recording pipeline rather than attempting upload:* *PENDING*.
 
-*** AC6.8 - Live recording produces a shareable configured-player URL
+*** VALID AC6.8 - Live recording produces a shareable configured-player URL
 
 **** Requirement
 
@@ -435,17 +492,13 @@ The operator's end-to-end experience of "recording ends -> URL is shareable from
 - *Introduced by:* [[file:archive/migrated-tickets/6.md][#6 - Upload meeting video recordings to Cloudflare Stream instead of WebDAV]]
 - *Delivery evidence:* Commit =90365622652ef2658dfb5015008d33f94aa05c60= is linked from the ticket.
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *UT-6.1 - A real meeting recording reaches Cloudflare Stream, creates both success artefacts, plays through the configured URL, and has the recorded deletion date:* *PASS*. Confirmed 2026-06-10.
 
 ** Time-bound room registry
 
-*** AC7.1 - Unregistered room paths do not serve a meeting page
+*** VALID AC7.1 - Unregistered room paths do not serve a meeting page
 
 **** Requirement
 
@@ -456,16 +509,12 @@ An unauthenticated visitor to a meeting room URL that has not been registered do
 - *Introduced by:* [[file:archive/migrated-tickets/7.md][#7 - Server-side time-bound room registry with CLI subcommands]] (closed 2026-06-09)
 - *Delivery evidence:* Ticket-linked commits and UT-7.1 - live room scheduling PASS on 2026-06-09.
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-7.1 - An unregistered room request without a JWT receives a no-such-meeting response:* *PASS*.
 - *RT-7.2 - The blocked response contains no JaaS initialization, room name, or app ID:* *PASS*.
 
-*** AC7.2 - Registered room paths serve meetings only during their configured window
+*** VALID AC7.2 - Registered room paths serve meetings only during their configured window
 
 **** Requirement
 
@@ -476,10 +525,6 @@ An unauthenticated visitor to a registered meeting room gets the meeting page on
 - *Introduced by:* [[file:archive/migrated-tickets/7.md][#7 - Server-side time-bound room registry with CLI subcommands]] (closed 2026-06-09)
 - *Delivery evidence:* Ticket-linked commits and UT-7.1 - live room scheduling PASS on 2026-06-09.
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-7.3 - A room before its window returns the not-found response:* *PASS*.
@@ -488,7 +533,7 @@ VALID
 - *RT-7.6 - Exactly =valid_from= is inside the window:* *PASS*.
 - *RT-7.7 - Exactly =valid_until= is inside the window:* *PASS*.
 
-*** AC7.3 - Operator registers a named meeting window through the CLI
+*** SUPERSEDED AC7.3 - Operator registers a named meeting window through the CLI
 
 **** Requirement
 
@@ -499,10 +544,9 @@ An operator can register a meeting room from the CLI by specifying a name and a 
 - *Introduced by:* [[file:archive/migrated-tickets/7.md][#7 - Server-side time-bound room registry with CLI subcommands]] (closed 2026-06-09)
 - *Delivery evidence:* Ticket-linked commits and UT-7.1 - live room scheduling PASS on 2026-06-09.
 
-**** Status
+**** Status qualification
 
-SUPERSEDED IN PART - #20 - Simplify create date/time replaces the original =--from <timestamp> --until <timestamp>= CLI contract; named-window registration remains applicable.
-
+IN PART - #20 - Simplify create date/time replaces the original =--from <timestamp> --until <timestamp>= CLI contract; named-window registration remains applicable.
 **** Tests
 
 - *RT-7.8 - =meet create= writes a created row with the supplied room and times:* *PASS*.
@@ -510,7 +554,7 @@ SUPERSEDED IN PART - #20 - Simplify create date/time replaces the original =--fr
 - *RT-7.10 - Omitting =--room= fails and writes no row:* *PASS*.
 - *RT-7.11 - An invalid window fails and writes no row:* *PASS*.
 
-*** AC7.4 - Operator cancellation immediately blocks room access
+*** VALID AC7.4 - Operator cancellation immediately blocks room access
 
 **** Requirement
 
@@ -521,17 +565,13 @@ An operator can cancel a registered meeting room from the CLI. After cancellatio
 - *Introduced by:* [[file:archive/migrated-tickets/7.md][#7 - Server-side time-bound room registry with CLI subcommands]] (closed 2026-06-09)
 - *Delivery evidence:* Ticket-linked commits and UT-7.1 - live room scheduling PASS on 2026-06-09.
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-7.12 - =meet cancel= writes a cancelled row:* *PASS*.
 - *RT-7.13 - A cancelled active-window room returns the not-found response:* *PASS*.
 - *RT-7.14 - Cancelling an unregistered room fails and writes no row:* *PASS*.
 
-*** AC7.5 - Operator lists rooms by current registry state
+*** VALID AC7.5 - Operator lists rooms by current registry state
 
 **** Requirement
 
@@ -542,10 +582,6 @@ An operator can list meeting rooms from the CLI, with the listing reflecting the
 - *Introduced by:* [[file:archive/migrated-tickets/7.md][#7 - Server-side time-bound room registry with CLI subcommands]] (closed 2026-06-09)
 - *Delivery evidence:* Ticket-linked commits and UT-7.1 - live room scheduling PASS on 2026-06-09.
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-7.15 - =meet list= shows each room's latest status and window:* *PASS*.
@@ -553,7 +589,7 @@ VALID
 - *RT-7.17 - The cancelled filter shows only cancelled rooms:* *PASS*.
 - *RT-7.18 - The past filter shows created rooms whose window has ended:* *PASS*.
 
-*** AC7.6 - Moderator authorization bypasses the room registry
+*** SUPERSEDED AC7.6 - Moderator authorization bypasses the room registry
 
 **** Requirement
 
@@ -564,10 +600,9 @@ A visitor presenting a valid moderator JWT bypasses the registry entirely. A mod
 - *Introduced by:* [[file:archive/migrated-tickets/7.md][#7 - Server-side time-bound room registry with CLI subcommands]] (closed 2026-06-09)
 - *Delivery evidence:* Ticket-linked commits and UT-7.1 - live room scheduling PASS on 2026-06-09.
 
-**** Status
+**** Status qualification
 
-SUPERSEDED IN PART - AC12.3 - room-bound moderator JWT and AC12.7 - wildcard super-moderator JWT distinguish room-scoped and all-room bypass.
-
+IN PART - AC12.3 - room-bound moderator JWT and AC12.7 - wildcard super-moderator JWT distinguish room-scoped and all-room bypass.
 **** Tests
 
 - *RT-7.19 - A valid all-room moderator JWT admits an unregistered room:* *PASS*.
@@ -575,7 +610,7 @@ SUPERSEDED IN PART - AC12.3 - room-bound moderator JWT and AC12.7 - wildcard sup
 - *RT-7.21 - A valid all-room moderator JWT admits a room outside its window:* *PASS*.
 - *RT-7.22 - An invalid or expired JWT is treated as unauthenticated:* *PASS*.
 
-*** AC7.7 - Registry state persists across service restarts
+*** VALID AC7.7 - Registry state persists across service restarts
 
 **** Requirement
 
@@ -586,16 +621,12 @@ Registry state persists across service restarts. A room created, cancelled, or m
 - *Introduced by:* [[file:archive/migrated-tickets/7.md][#7 - Server-side time-bound room registry with CLI subcommands]] (closed 2026-06-09)
 - *Delivery evidence:* Ticket-linked commits and UT-7.1 - live room scheduling PASS on 2026-06-09.
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-7.23 - Created room state survives a fresh server construction:* *PASS*.
 - *RT-7.24 - Cancelled room state survives a fresh server construction:* *PASS*.
 
-*** AC7.8 - Live schedule gates participant access across the meeting window
+*** VALID AC7.8 - Live schedule gates participant access across the meeting window
 
 **** Requirement
 
@@ -605,17 +636,13 @@ The end-to-end experience of "schedule a room with the CLI, share the URL, admit
 
 - *Introduced by:* [[file:archive/migrated-tickets/7.md][#7 - Server-side time-bound room registry with CLI subcommands]] (closed 2026-06-09)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *UT-7.1 - A live scheduled room blocks before and after its window, admits during it, and blocks after mid-window cancellation:* *PASS*. Confirmed 2026-06-09.
 
 ** Remote operator helper
 
-*** AC8.1 - Remote helper forwards any meet subcommand
+*** VALID AC8.1 - Remote helper forwards any meet subcommand
 
 **** Requirement
 
@@ -626,17 +653,16 @@ An operator can run any =meet= subcommand on a remote host through the =meet-hel
 - *Introduced by:* [[file:archive/migrated-tickets/8.md][#8 - Replace meet-token with generalized meet-helper SSH shim]] (closed 2026-06-09)
 - *Delivery evidence:* Ticket-linked commits and UT-8.1 - live remote-helper PASS on 2026-06-09.
 
-**** Status
+**** Status qualification
 
-VALID, with the production command path superseded by AC10.1 - NixOS system-package invocation.
-
+with the production command path superseded by AC10.1 - NixOS system-package invocation.
 **** Tests
 
 - *RT-8.1 - Token invocation constructs the expected SSH argument vector:* *PENDING*.
 - *RT-8.2 - Create invocation constructs an SSH command with the full subcommand and arguments:* *PENDING*.
 - *RT-8.3 - Additional arguments are forwarded verbatim and in order, including shell metacharacters:* *PENDING*.
 
-*** AC8.2 - Remote helper supplies the deployment configuration contract
+*** SUPERSEDED AC8.2 - Remote helper supplies the deployment configuration contract
 
 **** Requirement
 
@@ -647,16 +673,15 @@ The remote command always uses the canonical deploy-time config cascade without 
 - *Introduced by:* [[file:archive/migrated-tickets/8.md][#8 - Replace meet-token with generalized meet-helper SSH shim]] (closed 2026-06-09)
 - *Delivery evidence:* Ticket-linked commits and UT-8.1 - live remote-helper PASS on 2026-06-09.
 
-**** Status
+**** Status qualification
 
-SUPERSEDED - AC10.1 - NixOS system-package invocation and AC10.2 - CONFIG_PATH-owned cascade replace the Ubuntu path contract.
-
+AC10.1 - NixOS system-package invocation and AC10.2 - CONFIG_PATH-owned cascade replace the Ubuntu path contract.
 **** Tests
 
 - *RT-8.4 - The command contains exactly one ordered =--config= cascade argument:* *PENDING*.
 - *RT-8.5 - Host config path interpolation matches the host argument verbatim:* *PENDING*.
 
-*** AC8.3 - meet-token is replaced by meet-helper
+*** VALID AC8.3 - meet-token is replaced by meet-helper
 
 **** Requirement
 
@@ -667,17 +692,13 @@ The previous =meet-token= binary, install target, and uninstall target are remov
 - *Introduced by:* [[file:archive/migrated-tickets/8.md][#8 - Replace meet-token with generalized meet-helper SSH shim]] (closed 2026-06-09)
 - *Delivery evidence:* Ticket-linked commits and UT-8.1 - live remote-helper PASS on 2026-06-09.
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-8.6 - The former =cmd/remote-token/= source is absent:* *PENDING*.
 - *RT-8.7 - Installation exposes =meet-helper= and not =meet-token=*: *PENDING*.
 - *RT-8.8 - The repository contains no remaining =meet-token= reference:* *PENDING*.
 
-*** AC8.4 - Remote helper validates invocation and provides help
+*** VALID AC8.4 - Remote helper validates invocation and provides help
 
 **** Requirement
 
@@ -688,17 +709,13 @@ Invoking the shim without a host or subcommand prints usage and exits non-zero; 
 - *Introduced by:* [[file:archive/migrated-tickets/8.md][#8 - Replace meet-token with generalized meet-helper SSH shim]] (closed 2026-06-09)
 - *Delivery evidence:* Ticket-linked commits and UT-8.1 - live remote-helper PASS on 2026-06-09.
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-8.9 - No-argument invocation fails and prints usage:* *PENDING*.
 - *RT-8.10 - =-h= and =--help= print help and exit zero:* *PENDING*.
 - *RT-8.11 - A host without a subcommand fails:* *PENDING*.
 
-*** AC8.5 - Remote helper works against the live deployment
+*** VALID AC8.5 - Remote helper works against the live deployment
 
 **** Requirement
 
@@ -708,17 +725,16 @@ The operator's experience of running any =meet= subcommand on the deployment hos
 
 - *Introduced by:* [[file:archive/migrated-tickets/8.md][#8 - Replace meet-token with generalized meet-helper SSH shim]] (closed 2026-06-09)
 
-**** Status
+**** Status qualification
 
-VALID, with the live target contract updated by #10 - Retarget meet-helper for NixOS-only deployments.
-
+with the live target contract updated by #10 - Retarget meet-helper for NixOS-only deployments.
 **** Tests
 
 - *UT-8.1 - Live helper list output matches direct invocation and helper create registers a visible room:* *PASS*. Confirmed 2026-06-09.
 
 ** Command help sources
 
-*** AC9.1 - Help text is edited under docs/help without Go source changes
+*** VALID AC9.1 - Help text is edited under docs/help without Go source changes
 
 **** Requirement
 
@@ -728,10 +744,6 @@ A change to any =meet= help text is made by editing a file under =docs/help/=, w
 
 - *Introduced by:* [[file:archive/migrated-tickets/9.md][#9 - Migrate meet's per-subcommand help text to docs/help/]] (closed 2026-06-09)
 - *Delivery evidence:* Ticket-linked commits; RT-9.1 through RT-9.4 were recorded passing on 2026-05-26; UT-9.1 was confirmed PASS on 2026-06-09.
-
-**** Status
-
-VALID
 
 **** Tests
 
@@ -743,7 +755,7 @@ VALID
 
 ** NixOS remote administration
 
-*** AC10.1 - Helper uses the NixOS admin wrapper without deployment paths
+*** VALID AC10.1 - Helper uses the NixOS admin wrapper without deployment paths
 
 **** Requirement
 
@@ -754,17 +766,13 @@ Operators can run =meet= admin subcommands on a NixOS deployment through =meet-h
 - *Introduced by:* [[file:archive/migrated-tickets/10.md][#10 - Retarget meet-helper for NixOS-only deployments]] (closed 2026-06-09)
 - *Delivery evidence:* Ticket-linked commits, recorded passing suite, and UT-10.1 - live NixOS scheduling PASS on 2026-06-09.
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-10.1 - Token helper argv uses =sudo -u meet meet-admin=*: *PASS*.
 - *RT-10.2 - List helper argv uses the admin wrapper and contains no direct deployment paths or =--config=*: *PASS*.
 - *RT-10.5 - The host is used only as the SSH destination and not in app configuration paths:* *PASS*.
 
-*** AC10.2 - NixOS helper preserves the general subcommand interface
+*** VALID AC10.2 - NixOS helper preserves the general subcommand interface
 
 **** Requirement
 
@@ -775,16 +783,12 @@ Operators can use the same =meet-helper <host> <subcommand> [args...]= interface
 - *Introduced by:* [[file:archive/migrated-tickets/10.md][#10 - Retarget meet-helper for NixOS-only deployments]] (closed 2026-06-09)
 - *Delivery evidence:* Ticket-linked commits, recorded passing suite, and UT-10.1 - live NixOS scheduling PASS on 2026-06-09.
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-10.3 - Create preserves its subcommand and argument order:* *PASS*.
 - *RT-10.4 - Shell metacharacters remain shell-quoted in the remote command:* *PASS*.
 
-*** AC10.3 - Helper documentation describes the NixOS admin-wrapper contract
+*** VALID AC10.3 - Helper documentation describes the NixOS admin-wrapper contract
 
 **** Requirement
 
@@ -795,16 +799,12 @@ Operator-facing helper documentation describes the NixOS admin-wrapper contract 
 - *Introduced by:* [[file:archive/migrated-tickets/10.md][#10 - Retarget meet-helper for NixOS-only deployments]] (closed 2026-06-09)
 - *Delivery evidence:* Ticket-linked commits, recorded passing suite, and UT-10.1 - live NixOS scheduling PASS on 2026-06-09.
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-8.12 - Helper help remains sourced byte-for-byte from =docs/help/meet-helper.txt=*: *PASS*.
 - *RT-8.8 - Tracked source and documentation contain no obsolete helper binary references:* *PASS*.
 
-*** AC10.4 - Live NixOS helper schedules, lists, and cancels a room
+*** VALID AC10.4 - Live NixOS helper schedules, lists, and cancels a room
 
 **** Requirement
 
@@ -814,15 +814,11 @@ The operator can schedule and inspect a room on a live NixOS deployment from the
 
 - *Introduced by:* [[file:archive/migrated-tickets/10.md][#10 - Retarget meet-helper for NixOS-only deployments]] (closed 2026-06-09)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *UT-10.1 - Live helper create, upcoming list, cancel, and cancelled list succeed on NixOS:* *PASS*. Confirmed 2026-06-09.
 
-*** AC10.5 - CLI accepts date-only and all-day scheduling forms
+*** SUPERSEDED AC10.5 - CLI accepts date-only and all-day scheduling forms
 
 **** Requirement
 
@@ -833,17 +829,16 @@ Operators can schedule rooms without typing full RFC3339 timestamps for ordinary
 - *Introduced by:* [[file:archive/migrated-tickets/10.md][#10 - Retarget meet-helper for NixOS-only deployments]] (closed 2026-06-09)
 - *Delivery evidence:* Ticket-linked commits and recorded passing suite.
 
-**** Status
+**** Status qualification
 
-SUPERSEDED - #20 - Simplify create date/time replaces the =--from/--until= and =--on= contract with date-only =--from= plus mandatory =--at= and duration.
-
+#20 - Simplify create date/time replaces the =--from/--until= and =--on= contract with date-only =--from= plus mandatory =--at= and duration.
 **** Tests
 
 - *RT-10.6 - Date-only =--from= and =--until= store midnight UTC bounds:* *PASS*.
 - *RT-10.7 - =--on= stores a UTC all-day window:* *PASS*.
 - *RT-10.8 - Mixing =--on= with explicit bounds is rejected:* *PASS*.
 
-*** AC10.6 - Help is local, canonical, and independent of remote configuration
+*** VALID AC10.6 - Help is local, canonical, and independent of remote configuration
 
 **** Requirement
 
@@ -854,10 +849,6 @@ Operators can read useful top-level and per-subcommand help from canonical docs 
 - *Introduced by:* [[file:archive/migrated-tickets/10.md][#10 - Retarget meet-helper for NixOS-only deployments]] (closed 2026-06-09)
 - *Delivery evidence:* Ticket-linked commits and recorded passing suite.
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-10.9 - Helper subcommand help is handled by the local companion =meet= binary:* *PASS*.
@@ -867,7 +858,7 @@ VALID
 
 ** Configuration discovery
 
-*** AC11.1 - CONFIG_PATH loads adjacent defaults before host configuration
+*** VALID AC11.1 - CONFIG_PATH loads adjacent defaults before host configuration
 
 **** Requirement
 
@@ -878,15 +869,11 @@ With =CONFIG_PATH= set, automatic config loading reads =defaults.yaml= from the 
 - *Introduced by:* [[file:archive/migrated-tickets/11.md][#11 - Load defaults.yaml beside CONFIG_PATH for NixOS deploy-nix]] (closed 2026-06-09)
 - *Delivery evidence:* RT-11.1 and RT-11.2 were recorded passing and the ticket was approved on 2026-06-09.
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-11.1 - Token generation reads keys from adjacent defaults and the base URL override from host config:* *PASS*.
 
-*** AC11.2 - Local development uses repository-relative defaults without CONFIG_PATH
+*** VALID AC11.2 - Local development uses repository-relative defaults without CONFIG_PATH
 
 **** Requirement
 
@@ -897,10 +884,6 @@ Without =CONFIG_PATH=, local development keeps using repository-relative =config
 - *Introduced by:* [[file:archive/migrated-tickets/11.md][#11 - Load defaults.yaml beside CONFIG_PATH for NixOS deploy-nix]] (closed 2026-06-09)
 - *Delivery evidence:* RT-11.1 and RT-11.2 were recorded passing and the ticket was approved on 2026-06-09.
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-11.2 - Empty =CONFIG_PATH=/=SECRETS_PATH= loads local defaults and reaches the expected missing-app-ID error:* *PASS*.
@@ -909,7 +892,7 @@ VALID
 ** Moderator Access
 
 
-*** AC12.1 - Moderator-link delivery restricted to authorized email and room pairs
+*** VALID AC12.1 - Moderator-link delivery restricted to authorized email and room pairs
 
 **** Requirement
 
@@ -919,10 +902,6 @@ Given moderator email-to-room relationships loaded from host secrets, the system
 
 - *Introduced by:* [[file:archive/migrated-tickets/12.md][#12 - Room-scoped moderator magic links]] (closed 2026-08-04)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-12.1 - Allowed email on =/allowed-room/moderator= shows the generic check-email page and records an outbound message in a capture mailer.*: *PASS*.
@@ -931,7 +910,7 @@ VALID
 - *RT-12.4 - Invalid email syntax is rejected as malformed input before authorization lookup.*: *PASS*.
 - *RT-12.5 - Empty room names and room names containing slashes have no moderator-link delivery.*: *PASS*.
 
-*** AC12.2 - Magic link scoped to the email-room pair with configurable expiry and no secret leakage
+*** VALID AC12.2 - Magic link scoped to the email-room pair with configurable expiry and no secret leakage
 
 **** Requirement
 
@@ -941,10 +920,6 @@ Given an authorized email and room, the emailed magic link is scoped to that ema
 
 - *Introduced by:* [[file:archive/migrated-tickets/12.md][#12 - Room-scoped moderator magic links]] (closed 2026-08-04)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-12.6 - The generated email contains a verify URL for the requested room and does not contain a moderator JWT.*: *PASS*.
@@ -952,7 +927,7 @@ VALID
 - *RT-12.8 - Captured logs for the web and CLI paths mask or omit full email addresses and do not include raw magic-link tokens or moderator JWTs.*: *PASS*.
 - *RT-12.9 - Two different room authorizations for the same email produce tokens that verify only for their own room payload.*: *PASS*.
 
-*** AC12.3 - Valid magic link grants a room-bound short-lived moderator URL
+*** VALID AC12.3 - Valid magic link grants a room-bound short-lived moderator URL
 
 **** Requirement
 
@@ -961,10 +936,6 @@ Given a valid unexpired magic link, the system grants a short-lived moderator UR
 **** Provenance
 
 - *Introduced by:* [[file:archive/migrated-tickets/12.md][#12 - Room-scoped moderator magic links]] (closed 2026-08-04)
-
-**** Status
-
-VALID
 
 **** Tests
 
@@ -975,7 +946,7 @@ VALID
 - *RT-12.14 - A tampered magic link displays the invalid-link page and sets no moderator JWT.*: *PASS*.
 - *RT-12.15 - A previously consumed magic link displays the invalid-link page and sets no moderator JWT.*: *PASS*.
 
-*** AC12.4 - Guest participation follows the latest room lifecycle row and its valid window
+*** VALID AC12.4 - Guest participation follows the latest room lifecycle row and its valid window
 
 **** Requirement
 
@@ -985,10 +956,6 @@ Given the existing room registry, guest participation remains governed by the la
 
 - *Introduced by:* [[file:archive/migrated-tickets/12.md][#12 - Room-scoped moderator magic links]] (closed 2026-08-04)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-12.16 - A guest can join a reused room name during the latest active window.*: *PASS*.
@@ -996,7 +963,7 @@ VALID
 - *RT-12.18 - A cancelled latest row prevents guest access even when an earlier row for the same room was active.*: *PASS*.
 - *RT-12.19 - Moderator magic-link authorization for a room does not make the plain room URL joinable outside the room window.*: *PASS*.
 
-*** AC12.5 - Absent or failing SMTP fails closed while preserving the generic response
+*** VALID AC12.5 - Absent or failing SMTP fails closed while preserving the generic response
 
 **** Requirement
 
@@ -1006,10 +973,6 @@ Given SMTP configuration is absent or delivery fails, the system fails closed fo
 
 - *Introduced by:* [[file:archive/migrated-tickets/12.md][#12 - Room-scoped moderator magic links]] (closed 2026-08-04)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-12.20 - Missing SMTP configuration shows the generic check-email page and creates no magic-link token usable by the verifier.*: *PASS*.
@@ -1017,7 +980,7 @@ VALID
 - *RT-12.22 - SMTP delivery failure creates an operator-visible warning without logging raw token material.*: *PASS*.
 - *RT-12.23 - A successful SMTP handoff is required before the verifier accepts the corresponding token.*: *PASS*.
 
-*** AC12.6 - Moderator entry page exists at the single-segment room path
+*** VALID AC12.6 - Moderator entry page exists at the single-segment room path
 
 **** Requirement
 
@@ -1027,17 +990,13 @@ Given a single-segment room path, the moderator entry page exists at =/<room>/mo
 
 - *Introduced by:* [[file:archive/migrated-tickets/12.md][#12 - Room-scoped moderator magic links]] (closed 2026-08-04)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-12.24 - =GET /workshop/moderator= renders an email-only moderator entry form scoped to =workshop=.*: *PASS*.
 - *RT-12.25 - Form submission on =/workshop/moderator= evaluates authorization for =workshop= rather than a room supplied by form data.*: *PASS*.
 - *RT-12.26 - =GET /bad/name/moderator= has no moderator entry page.*: *PASS*.
 
-*** AC12.7 - Operator super-moderator URLs remain available independently of moderator-auth definitions
+*** VALID AC12.7 - Operator super-moderator URLs remain available independently of moderator-auth definitions
 
 **** Requirement
 
@@ -1047,17 +1006,13 @@ Given operator CLI use, super-moderator URLs for all rooms remain available inde
 
 - *Introduced by:* [[file:archive/migrated-tickets/12.md][#12 - Room-scoped moderator magic links]] (closed 2026-08-04)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-12.27 - =meet token --room workshop= prints a moderator URL when no moderator-auth relationships are configured.*: *PASS*.
 - *RT-12.28 - The CLI-generated super-moderator JWT carries an all-rooms claim.*: *PASS*.
 - *RT-12.29 - The CLI-generated super-moderator JWT permits local room-window bypass for a different room during its token lifetime.*: *PASS*.
 
-*** AC12.8 - CLI path for room-scoped moderator-link delivery to authorized pairs
+*** VALID AC12.8 - CLI path for room-scoped moderator-link delivery to authorized pairs
 
 **** Requirement
 
@@ -1066,10 +1021,6 @@ Given operator CLI use and host-secret moderator relationships, authorized email
 **** Provenance
 
 - *Introduced by:* [[file:archive/migrated-tickets/12.md][#12 - Room-scoped moderator magic links]] (closed 2026-08-04)
-
-**** Status
-
-VALID
 
 **** Tests
 
@@ -1080,7 +1031,7 @@ VALID
 ** Room Access Gate
 
 
-*** AC13.1 - Blocked room paths return a byte-identical inactive-room 404 across all blocked states
+*** VALID AC13.1 - Blocked room paths return a byte-identical inactive-room 404 across all blocked states
 
 **** Requirement
 
@@ -1089,10 +1040,6 @@ Given any public single-segment meeting-room path that is not active now, the re
 **** Provenance
 
 - *Introduced by:* [[file:archive/migrated-tickets/13.md][#13 - Inactive-room page for gated meeting slugs]] (closed 2026-08-05)
-
-**** Status
-
-VALID
 
 **** Tests
 
@@ -1105,7 +1052,7 @@ VALID
 - *RT-13.12 - A =HEAD= request, and a request with a disallowed method, to a blocked top-level slug returns the same status and headers as the =GET= inactive response, with no =Content-Length= or other header that varies by blocked state.*: *PASS*.
 - *RT-13.13 - A request to =/= (the empty top-level segment) without a moderator bypass returns the same inactive-room response as any other blocked slug.*: *PASS*.
 
-*** AC13.2 - Non-room routes carry no inactive-room messaging and the moderator entry is not a slug oracle
+*** SUPERSEDED AC13.2 - Non-room routes carry no inactive-room messaging and the moderator entry is not a slug oracle
 
 **** Requirement
 
@@ -1115,10 +1062,9 @@ Given a path that is not a single-segment meeting-room slug, inactive-room messa
 
 - *Introduced by:* [[file:archive/migrated-tickets/13.md][#13 - Inactive-room page for gated meeting slugs]] (closed 2026-08-05)
 
-**** Status
+**** Status qualification
 
-SUPERSEDED - superseded by AC14.1 - Moderator login form available only for an active room; otherwise byte-identical to the guest 404
-
+superseded by AC14.1 - Moderator login form available only for an active room; otherwise byte-identical to the guest 404
 **** Supersession and conflicts
 
 Superseded by AC14.1 (#14, closed 2026-08-11): the =/<room>/moderator= entry response is now active-gated and does vary with registry state, returning the guest inactive-room 404 unless the room is active. The oracle-resistance goal is preserved by AC14.1 (blocked states are byte-identical to the guest 404); it is no longer achieved by serving the entry page unconditionally.
@@ -1130,7 +1076,7 @@ Superseded by AC14.1 (#14, closed 2026-08-11): the =/<room>/moderator= entry res
 - *RT-13.9 - =GET /bad/name/moderator= keeps non-moderator-route handling and does not contain the inactive-room message.*: *PASS*.
 - *RT-13.14 - =GET /<active-room>/moderator= and =GET /<never-registered-room>/moderator= return the same moderator entry response, with no difference in status, headers, or body attributable to registry state.*: *SUPERSEDED*. (removed: superseded by #14)
 
-*** AC13.3 - Active room paths serve the meeting page and no response distinguishes a former slug
+*** VALID AC13.3 - Active room paths serve the meeting page and no response distinguishes a former slug
 
 **** Requirement
 
@@ -1140,16 +1086,12 @@ Given public access to an active single-segment meeting-room path, the meeting p
 
 - *Introduced by:* [[file:archive/migrated-tickets/13.md][#13 - Inactive-room page for gated meeting slugs]] (closed 2026-08-05)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-13.10 - A guest loading a room during its active window receives the meeting page rather than the inactive-room page.*: *PASS*.
 - *RT-13.11 - The public response for a slug whose latest row is cancelled, or whose active window has passed, is byte-for-byte identical in status code, response headers, and body to the response for a never-registered slug.*: *PASS*.
 
-*** AC13.4 - Inactive-room and meeting-page responses are non-storable
+*** VALID AC13.4 - Inactive-room and meeting-page responses are non-storable
 
 **** Requirement
 
@@ -1159,16 +1101,12 @@ Given the inactive-room page and the meeting page, both responses instruct clien
 
 - *Introduced by:* [[file:archive/migrated-tickets/13.md][#13 - Inactive-room page for gated meeting slugs]] (closed 2026-08-05)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-13.15 - The inactive-room response sets =Cache-Control: no-store=.*: *PASS*.
 - *RT-13.16 - The meeting-page response sets =Cache-Control: no-store=.*: *PASS*.
 
-*** AC14.1 - Moderator login form available only for an active room; otherwise byte-identical to the guest 404
+*** VALID AC14.1 - Moderator login form available only for an active room; otherwise byte-identical to the guest 404
 
 **** Requirement
 
@@ -1177,10 +1115,6 @@ Given a request to =/<room>/moderator=, the moderator login form is available on
 **** Provenance
 
 - *Introduced by:* [[file:archive/migrated-tickets/14.md][#14 - Gate moderator entry on active room; relabel to Login]] (closed 2026-08-11). Supersedes AC13.2.
-
-**** Status
-
-VALID
 
 **** Tests
 
@@ -1193,7 +1127,7 @@ VALID
 - *RT-14.7 - For the same not-active room, the moderator path and the plain room path return the byte-identical inactive page.*: *PASS*.
 - *RT-14.8 - A form submission to a not-active room's moderator path delivers no magic link and returns the inactive 404.*: *PASS*.
 
-*** AC14.2 - Public moderator-auth pages use the Login heading and never the word moderator
+*** VALID AC14.2 - Public moderator-auth pages use the Login heading and never the word moderator
 
 **** Requirement
 
@@ -1202,10 +1136,6 @@ Given the public moderator-auth pages, the entry page heading and title are "Log
 **** Provenance
 
 - *Introduced by:* [[file:archive/migrated-tickets/14.md][#14 - Gate moderator entry on active room; relabel to Login]] (closed 2026-08-11)
-
-**** Status
-
-VALID
 
 **** Tests
 
@@ -1217,7 +1147,7 @@ VALID
 
 UT-15.1 through UT-15.14 were confirmed passing by the operator on 2026-08-08.
 
-*** AC15.1 - Timer configuration is stored as whole-second thresholds and rejects invalid values
+*** VALID AC15.1 - Timer configuration is stored as whole-second thresholds and rejects invalid values
 
 **** Requirement
 
@@ -1227,10 +1157,6 @@ Given a timer configuration of total time, early-warning percent, and grace perc
 
 - *Introduced by:* [[file:archive/migrated-tickets/15.md][#15 - Shared per-room meeting timer with phase colours and chimes]] (closed 2026-08-08)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-15.1 - A 5:00 total with a 10% early-warning yields a threshold 30s before the total.*: *PASS*.
@@ -1239,7 +1165,7 @@ VALID
 - *RT-15.4 - A total of zero or negative leaves no stored configuration.*: *PASS*.
 - *RT-15.5 - An early-warning or grace percent below 0 or above 100 leaves no stored configuration.*: *PASS*.
 
-*** AC15.2 - Reported timer phase and remaining or count-up time track the clock
+*** VALID AC15.2 - Reported timer phase and remaining or count-up time track the clock
 
 **** Requirement
 
@@ -1248,10 +1174,6 @@ Given a started timer, the room's reported phase is running-before-warning while
 **** Provenance
 
 - *Introduced by:* [[file:archive/migrated-tickets/15.md][#15 - Shared per-room meeting timer with phase colours and chimes]] (closed 2026-08-08)
-
-**** Status
-
-VALID
 
 **** Tests
 
@@ -1262,7 +1184,7 @@ VALID
 - *RT-15.10 - At the grace limit, the phase is grace-exceeded.*: *PASS*.
 - *RT-15.11 - Reported remaining before the total matches total-minus-elapsed.*: *PASS*.
 
-*** AC15.3 - A paused timer freezes run-elapsed and resumes from the frozen point
+*** VALID AC15.3 - A paused timer freezes run-elapsed and resumes from the frozen point
 
 **** Requirement
 
@@ -1272,17 +1194,13 @@ Given a paused timer, run-elapsed does not advance while wall-clock time passes,
 
 - *Introduced by:* [[file:archive/migrated-tickets/15.md][#15 - Shared per-room meeting timer with phase colours and chimes]] (closed 2026-08-08)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-15.12 - After a pause, a wall-clock advance leaves the phase and remaining unchanged.*: *PASS*.
 - *RT-15.13 - After a resume, a wall-clock advance progresses the phase and remaining from the frozen point.*: *PASS*.
 - *RT-15.14 - A pause in the running-after-warning phase holds that phase across a wall-clock advance.*: *PASS*.
 
-*** AC15.4 - Reset or stop clears the active timer but retains configuration; restart runs from zero
+*** VALID AC15.4 - Reset or stop clears the active timer but retains configuration; restart runs from zero
 
 **** Requirement
 
@@ -1292,17 +1210,13 @@ After a reset or stop, the room has no active timer and retains its configuratio
 
 - *Introduced by:* [[file:archive/migrated-tickets/15.md][#15 - Shared per-room meeting timer with phase colours and chimes]] (closed 2026-08-08)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-15.15 - After a reset, the room is stopped and a subsequent start reuses the retained settings.*: *PASS*.
 - *RT-15.16 - After a restart, the timer runs from zero with the same configuration.*: *PASS*.
 - *RT-15.17 - A stop from the grace phase leaves the room stopped.*: *PASS*.
 
-*** AC15.5 - Grace limit leads to grace-exceeded then stopped unless extended
+*** VALID AC15.5 - Grace limit leads to grace-exceeded then stopped unless extended
 
 **** Requirement
 
@@ -1312,17 +1226,13 @@ Given a timer that reaches its grace limit, without an extend action the room is
 
 - *Introduced by:* [[file:archive/migrated-tickets/15.md][#15 - Shared per-room meeting timer with phase colours and chimes]] (closed 2026-08-08)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-15.18 - Reaching the grace limit without an extend yields grace-exceeded, then stopped after the flash window.*: *PASS*.
 - *RT-15.19 - An extend during grace keeps the timer active and counting past the grace limit.*: *PASS*.
 - *RT-15.20 - A stop after an extend leaves the room stopped.*: *PASS*.
 
-*** AC15.6 - Timer control actions require a valid room-scoped or wildcard moderator token
+*** VALID AC15.6 - Timer control actions require a valid room-scoped or wildcard moderator token
 
 **** Requirement
 
@@ -1332,10 +1242,6 @@ A timer control action (set, start, pause, resume, reset, restart, stop, extend)
 
 - *Introduced by:* [[file:archive/migrated-tickets/15.md][#15 - Shared per-room meeting timer with phase colours and chimes]] (closed 2026-08-08)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-15.21 - A control action with no token leaves the state unchanged.*: *PASS*.
@@ -1344,7 +1250,7 @@ VALID
 - *RT-15.24 - A control action with a room-scoped token for this room is applied.*: *PASS*.
 - *RT-15.25 - A control action with a wildcard super-moderator token is applied.*: *PASS*.
 
-*** AC15.7 - Timer subscriptions carry current state on connect and each subsequent change
+*** VALID AC15.7 - Timer subscriptions carry current state on connect and each subsequent change
 
 **** Requirement
 
@@ -1354,10 +1260,6 @@ A participant's timer subscription reflects the room's current timer state on co
 
 - *Introduced by:* [[file:archive/migrated-tickets/15.md][#15 - Shared per-room meeting timer with phase colours and chimes]] (closed 2026-08-08)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-15.26 - A new subscription carries the current state as its first message.*: *PASS*.
@@ -1366,7 +1268,7 @@ VALID
 - *RT-21.5 - A heartbeat re-anchors authoritative elapsed state without a control action:* *PASS*. Added by #21 - Timer chimes drift between clients.
 - *RT-21.7 - A late subscriber receives no stale cue for a boundary already passed:* *PASS*. Added by #21 - Timer chimes drift between clients.
 
-*** AC15.8 - One timer per room reflecting the most recent control action, seen by all subscribers
+*** VALID AC15.8 - One timer per room reflecting the most recent control action, seen by all subscribers
 
 **** Requirement
 
@@ -1376,16 +1278,12 @@ A room holds a single timer whose state reflects the most recently applied contr
 
 - *Introduced by:* [[file:archive/migrated-tickets/15.md][#15 - Shared per-room meeting timer with phase colours and chimes]] (closed 2026-08-08)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-15.29 - Two sequential control actions from different moderator tokens converge to the later action's state.*: *PASS*.
 - *RT-15.30 - Two concurrent subscriptions observe identical post-action state.*: *PASS*.
 
-*** AC15.9 - Timers are independent per room
+*** VALID AC15.9 - Timers are independent per room
 
 **** Requirement
 
@@ -1395,16 +1293,12 @@ Timers are independent per room: a control action on one room's timer leaves oth
 
 - *Introduced by:* [[file:archive/migrated-tickets/15.md][#15 - Shared per-room meeting timer with phase colours and chimes]] (closed 2026-08-08)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-15.31 - Starting a timer in one room leaves a second room with no active timer.*: *PASS*.
 - *RT-15.32 - Two rooms run timers at independent phases concurrently.*: *PASS*.
 
-*** AC15.10 - Banner colour reflects the timer phase for every participant
+*** VALID AC15.10 - Banner colour reflects the timer phase for every participant
 
 **** Requirement
 
@@ -1414,16 +1308,12 @@ The banner colour reflects the timer phase for every participant: blue when no t
 
 - *Introduced by:* [[file:archive/migrated-tickets/15.md][#15 - Shared per-room meeting timer with phase colours and chimes]] (closed 2026-08-08)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *UT-15.1 - A participant observes the banner move blue to green to amber to red across a run, with legible numerals throughout.*: *PASS*.
 - *UT-15.2 - A participant observes the grace-exceeded black/red flash for about ten seconds and the return to blue on auto-reset.*: *PASS*.
 
-*** AC15.11 - Banner presents phase-appropriate controls to moderators and none to non-moderators
+*** VALID AC15.11 - Banner presents phase-appropriate controls to moderators and none to non-moderators
 
 **** Requirement
 
@@ -1433,16 +1323,12 @@ The banner presents moderators the phase-appropriate controls (stopped: Set, Sta
 
 - *Introduced by:* [[file:archive/migrated-tickets/15.md][#15 - Shared per-room meeting timer with phase colours and chimes]] (closed 2026-08-08)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *UT-15.3 - A moderator sees the correct control set in each phase.*: *PASS*.
 - *UT-15.4 - A non-moderator sees the countdown and grace count-up but never any control.*: *PASS*.
 
-*** AC15.12 - Chimes play at each timer event with audio armed on join
+*** VALID AC15.12 - Chimes play at each timer event with audio armed on join
 
 **** Requirement
 
@@ -1451,10 +1337,6 @@ Every participant hears a start chime when the timer starts, a pause chime when 
 **** Provenance
 
 - *Introduced by:* [[file:archive/migrated-tickets/15.md][#15 - Shared per-room meeting timer with phase colours and chimes]] (closed 2026-08-08)
-
-**** Status
-
-VALID
 
 **** Tests
 
@@ -1468,7 +1350,7 @@ VALID
 - *RT-21.6 - A time-based cue fires once per run:* *PASS*. Added by #21 - Timer chimes drift between clients.
 - *UT-21.1 - Live warning and timeout chimes play together for all participants without echo:* *PENDING*.
 
-*** AC15.13 - Configuration control shows mm:ss and live-computed percentages
+*** VALID AC15.13 - Configuration control shows mm:ss and live-computed percentages
 
 **** Requirement
 
@@ -1478,16 +1360,12 @@ The configuration control presents total as mm:ss and early-warning and grace as
 
 - *Introduced by:* [[file:archive/migrated-tickets/15.md][#15 - Shared per-room meeting timer with phase colours and chimes]] (closed 2026-08-08)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *UT-15.7 - On opening, the popover shows the correct computed mm:ss beside the early-warning and grace percentages for the current total.*: *PASS*.
 - *UT-15.8 - Editing the total or either percentage updates the computed mm:ss live.*: *PASS*.
 
-*** AC15.14 - Active timer and controls remain usable on a narrow viewport
+*** VALID AC15.14 - Active timer and controls remain usable on a narrow viewport
 
 **** Requirement
 
@@ -1497,16 +1375,12 @@ On a narrow (mobile) viewport the active timer and its controls remain usable wi
 
 - *Introduced by:* [[file:archive/migrated-tickets/15.md][#15 - Shared per-room meeting timer with phase colours and chimes]] (closed 2026-08-08)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *UT-15.9 - The banner with an active timer and the moderator control set remains usable at a phone width.*: *PASS*.
 - *UT-15.10 - The non-moderator banner with an active timer remains usable at a phone width without obscuring the domain.*: *PASS*.
 
-*** AC15.15 - An unmuted microphone is muted for each chime and restored afterwards
+*** VALID AC15.15 - An unmuted microphone is muted for each chime and restored afterwards
 
 **** Requirement
 
@@ -1516,10 +1390,6 @@ While any of the six chimes plays, a participant whose microphone is unmuted has
 
 - *Introduced by:* [[file:archive/migrated-tickets/15.md][#15 - Shared per-room meeting timer with phase colours and chimes]] (closed 2026-08-08)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *UT-15.11 - With an unmuted microphone, a participant's microphone mutes for the duration of a chime and returns to unmuted after it ends.*: *PASS*.
@@ -1527,7 +1397,7 @@ VALID
 - *UT-15.13 - On a second participant's device, a chime playing on the first participant's device is not heard re-broadcast into the meeting.*: *PASS*.
 - *UT-21.2 - A live active speaker is not left muted after a chime and the cue does not fight operator muting:* *PENDING*.
 
-*** AC15.16 - Timer configuration persists across a server restart; live running state does not
+*** VALID AC15.16 - Timer configuration persists across a server restart; live running state does not
 
 **** Requirement
 
@@ -1536,10 +1406,6 @@ A room's timer configuration persists across a server restart: after a fresh ser
 **** Provenance
 
 - *Introduced by:* [[file:archive/migrated-tickets/15.md][#15 - Shared per-room meeting timer with phase colours and chimes]] (closed 2026-08-08)
-
-**** Status
-
-VALID
 
 **** Tests
 
@@ -1551,7 +1417,7 @@ VALID
 ** Recurring Schedules
 
 
-*** AC17.1 - Room registry stores recurring definitions under last-row-wins
+*** VALID AC17.1 - Room registry stores recurring definitions under last-row-wins
 
 **** Requirement
 
@@ -1561,10 +1427,6 @@ The room registry stores recurring meeting definitions (weekly, every-N-weeks, m
 
 - *Introduced by:* [[file:archive/migrated-tickets/17.md][#17 - Recurring meeting-room schedules in the registry]] (closed 2026-08-11)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-17.1 - A stored weekly definition is read back as the room's current definition.*: *PASS*.
@@ -1572,7 +1434,7 @@ VALID
 - *RT-17.3 - A later definition for the same room supersedes an earlier one.*: *PASS*.
 - *RT-17.4 - A cancellation supersedes a recurring definition.*: *PASS*.
 
-*** AC17.2 - Weekly and every-N-weeks rooms open during each occurrence only
+*** VALID AC17.2 - Weekly and every-N-weeks rooms open during each occurrence only
 
 **** Requirement
 
@@ -1582,10 +1444,6 @@ Given a weekly or every-N-weeks recurring room, guest access is open during each
 
 - *Introduced by:* [[file:archive/migrated-tickets/17.md][#17 - Recurring meeting-room schedules in the registry]] (closed 2026-08-11)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-17.5 - A guest loads the meeting page during the first occurrence's window.*: *PASS*.
@@ -1593,7 +1451,7 @@ VALID
 - *RT-17.7 - A guest loads the meeting page during a later weekly occurrence.*: *PASS*.
 - *RT-17.8 - For a fortnightly room, a guest receives the inactive page during the skipped week and the meeting page on the following occurrence.*: *PASS*.
 
-*** AC17.3 - Monthly Nth-weekday rooms open during that occurrence each month
+*** VALID AC17.3 - Monthly Nth-weekday rooms open during that occurrence each month
 
 **** Requirement
 
@@ -1603,10 +1461,6 @@ Given a monthly Nth-weekday recurring room, guest access is open during that occ
 
 - *Introduced by:* [[file:archive/migrated-tickets/17.md][#17 - Recurring meeting-room schedules in the registry]] (closed 2026-08-11)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-17.9 - A "first Wednesday, 18:00 UTC" room opens to a guest during the first Wednesday's window.*: *PASS*.
@@ -1614,7 +1468,7 @@ VALID
 - *RT-17.11 - A month whose Nth weekday is absent yields no occurrence and the guest receives the inactive page.*: *PASS*.
 - *RT-17.12 - Occurrences in adjacent months are computed independently at the correct dates.*: *PASS*.
 
-*** AC17.4 - Occurrence duration and early-open lead resolve from config defaults with flag overrides
+*** VALID AC17.4 - Occurrence duration and early-open lead resolve from config defaults with flag overrides
 
 **** Requirement
 
@@ -1624,10 +1478,6 @@ When a room does not specify occurrence duration or early-open lead, the create 
 
 - *Introduced by:* [[file:archive/migrated-tickets/17.md][#17 - Recurring meeting-room schedules in the registry]] (closed 2026-08-11)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-17.13 - A create without =--duration= records the config-default duration on the row.*: *PASS*.
@@ -1635,7 +1485,7 @@ VALID
 - *RT-17.15 - An explicit =--duration= overrides the config default on the recorded row.*: *PASS*.
 - *RT-17.16 - An explicit =--open-early= overrides the config default on the recorded row.*: *PASS*.
 
-*** AC17.5 - Occurrence window opens at start-minus-lead and closes at start-plus-duration inclusively
+*** VALID AC17.5 - Occurrence window opens at start-minus-lead and closes at start-plus-duration inclusively
 
 **** Requirement
 
@@ -1645,10 +1495,6 @@ An occurrence's active window opens exactly the lead before its start and closes
 
 - *Introduced by:* [[file:archive/migrated-tickets/17.md][#17 - Recurring meeting-room schedules in the registry]] (closed 2026-08-11)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-17.17 - At exactly start-minus-lead, a guest loads the meeting page.*: *PASS*.
@@ -1656,7 +1502,7 @@ VALID
 - *RT-17.19 - At exactly start-plus-duration, a guest loads the meeting page.*: *PASS*.
 - *RT-17.20 - One second after start-plus-duration, a guest receives the inactive page.*: *PASS*.
 
-*** AC17.6 - A series end bounds occurrences; without one the series continues
+*** VALID AC17.6 - A series end bounds occurrences; without one the series continues
 
 **** Requirement
 
@@ -1666,17 +1512,13 @@ A recurring definition with a series end (=--ends=) has no occurrences after tha
 
 - *Introduced by:* [[file:archive/migrated-tickets/17.md][#17 - Recurring meeting-room schedules in the registry]] (closed 2026-08-11)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-17.21 - An occurrence before the series end opens to a guest.*: *PASS*.
 - *RT-17.22 - A would-be occurrence after the series end gives the guest the inactive page.*: *PASS*.
 - *RT-17.23 - With no series end, an occurrence far in the future still opens to a guest.*: *PASS*.
 
-*** AC17.7 - Cancelling a recurring room closes guest access and a later definition reopens it
+*** VALID AC17.7 - Cancelling a recurring room closes guest access and a later definition reopens it
 
 **** Requirement
 
@@ -1686,16 +1528,12 @@ A cancellation of a recurring room closes guest access during would-be occurrenc
 
 - *Introduced by:* [[file:archive/migrated-tickets/17.md][#17 - Recurring meeting-room schedules in the registry]] (closed 2026-08-11)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-17.24 - After cancelling a recurring room, a guest receives the inactive page during what would have been an active occurrence.*: *PASS*.
 - *RT-17.25 - A recurring definition created after a cancellation re-opens guest access during an occurrence.*: *PASS*.
 
-*** AC17.8 - Create records recurring rooms from recurrence and window flags, rejecting invalid definitions
+*** VALID AC17.8 - Create records recurring rooms from recurrence and window flags, rejecting invalid definitions
 
 **** Requirement
 
@@ -1704,10 +1542,6 @@ The create subcommand records a recurring room from recurrence, =--duration=, =-
 **** Provenance
 
 - *Introduced by:* [[file:archive/migrated-tickets/17.md][#17 - Recurring meeting-room schedules in the registry]] (closed 2026-08-11)
-
-**** Status
-
-VALID
 
 **** Notes
 
@@ -1722,7 +1556,7 @@ the closing clause "the deprecated =--until= remains accepted for one-off rooms"
 - *RT-17.32 - A create with =--ends= records the series end on the row.*: *PASS*.
 - *RT-17.33 - A create passing the removed =--until= flag is rejected and writes no row. (Repurposed by #20; originally asserted a one-off =--until= recorded the correct window.)*: *PASS*.
 
-*** AC17.9 - One-off room windows admit a guest only within their configured window
+*** VALID AC17.9 - One-off room windows admit a guest only within their configured window
 
 **** Requirement
 
@@ -1732,16 +1566,12 @@ One-off room windows continue to admit a guest only within their configured wind
 
 - *Introduced by:* [[file:archive/migrated-tickets/17.md][#17 - Recurring meeting-room schedules in the registry]] (closed 2026-08-11)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-17.30 - A one-off room opens to a guest within its window.*: *PASS*.
 - *RT-17.31 - A one-off room gives the guest the inactive page outside its window.*: *PASS*.
 
-*** AC17.10 - Zoned or recurring schedule verified end-to-end against the live deployment
+*** VALID AC17.10 - Zoned or recurring schedule verified end-to-end against the live deployment
 
 **** Requirement
 
@@ -1751,15 +1581,11 @@ The end-to-end schedule works against the live deployment: an operator-defined r
 
 - *Introduced by:* [[file:archive/migrated-tickets/17.md][#17 - Recurring meeting-room schedules in the registry]] (closed 2026-08-11)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *UT-17.1 - The operator runs =create= with a recurrence on the deployed host; a second device reaches the meeting during a current occurrence and the inactive page outside it. (Operator-confirmed PASS 2026-08-11.)*: *PASS*.
 
-*** AC17.11 - Duration values parse as unit-suffixed numbers or colon-split pairs
+*** VALID AC17.11 - Duration values parse as unit-suffixed numbers or colon-split pairs
 
 **** Requirement
 
@@ -1769,10 +1595,6 @@ A duration value is a number, or a colon-split pair, followed by a unit suffix (
 
 - *Introduced by:* [[file:archive/migrated-tickets/17.md][#17 - Recurring meeting-room schedules in the registry]] (closed 2026-08-11)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-17.34 - =4:30h= parses to four hours thirty minutes.*: *PASS*.
@@ -1781,7 +1603,7 @@ VALID
 - *RT-17.37 - A value with no unit, a non-numeric value, or a non-positive value is rejected.*: *PASS*.
 - *RT-17.38 - A colon minor field of sixty or more is rejected.*: *PASS*.
 
-*** AC18.1 - A recurring definition may carry an IANA timezone; without one it is computed in UTC
+*** VALID AC18.1 - A recurring definition may carry an IANA timezone; without one it is computed in UTC
 
 **** Requirement
 
@@ -1791,17 +1613,13 @@ A recurring definition may carry an IANA timezone; its occurrence start times ar
 
 - *Introduced by:* [[file:archive/migrated-tickets/18.md][#18 - Timezone-aware recurring schedules (IANA city codes, DST)]] (closed 2026-08-11)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-18.1 - A definition with a timezone is stored and read back carrying that zone.*: *PASS*.
 - *RT-18.2 - A guest loads the meeting page during an occurrence whose in-zone start maps to the current UTC instant.*: *PASS*.
 - *RT-18.3 - A definition with no timezone admits a guest at the same instants as the equivalent UTC definition.*: *PASS*.
 
-*** AC18.2 - Occurrences observe daylight saving for the definition's zone
+*** VALID AC18.2 - Occurrences observe daylight saving for the definition's zone
 
 **** Requirement
 
@@ -1811,17 +1629,13 @@ Occurrences observe daylight saving: a fixed local time-of-day maps to different
 
 - *Introduced by:* [[file:archive/migrated-tickets/18.md][#18 - Timezone-aware recurring schedules (IANA city codes, DST)]] (closed 2026-08-11)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-18.4 - For a zoned fixed-local-time definition, an occurrence in standard time and one in daylight time have UTC starts that differ by the zone's offset change.*: *PASS*.
 - *RT-18.5 - A guest is admitted at the correct UTC instant for a post-transition occurrence, not at the pre-transition UTC instant.*: *PASS*.
 - *RT-18.10 - A monthly =--at= time is interpreted in the =--tz= zone, so the stored anchor is the correct UTC instant (15:30 America/Detroit EDT is 19:30Z). (Added as a regression during #18.)*: *PASS*.
 
-*** AC18.3 - DST gap and overlap edge cases resolve to a single defined occurrence
+*** VALID AC18.3 - DST gap and overlap edge cases resolve to a single defined occurrence
 
 **** Requirement
 
@@ -1831,16 +1645,12 @@ Daylight-saving boundary edge cases resolve deterministically: a local time that
 
 - *Introduced by:* [[file:archive/migrated-tickets/18.md][#18 - Timezone-aware recurring schedules (IANA city codes, DST)]] (closed 2026-08-11)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-18.6 - A definition whose local time falls in the spring-forward gap yields a defined occurrence rather than an error.*: *PASS*.
 - *RT-18.7 - A definition whose local time falls in the fall-back overlap yields a single defined occurrence.*: *PASS*.
 
-*** AC18.4 - Create accepts and validates a timezone, rejecting unknown zones
+*** VALID AC18.4 - Create accepts and validates a timezone, rejecting unknown zones
 
 **** Requirement
 
@@ -1850,16 +1660,12 @@ The create subcommand accepts and validates a timezone, rejecting an unknown zon
 
 - *Introduced by:* [[file:archive/migrated-tickets/18.md][#18 - Timezone-aware recurring schedules (IANA city codes, DST)]] (closed 2026-08-11)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *RT-18.8 - A create with a valid IANA zone writes a row carrying that zone.*: *PASS*.
 - *RT-18.9 - A create with an unknown zone name exits non-zero and writes no row.*: *PASS*.
 
-*** AC18.5 - A zoned schedule opens at the correct local wall-clock time on the live deployment
+*** VALID AC18.5 - A zoned schedule opens at the correct local wall-clock time on the live deployment
 
 **** Requirement
 
@@ -1869,17 +1675,32 @@ The end-to-end zoned schedule works against the live deployment: a zoned recurri
 
 - *Introduced by:* [[file:archive/migrated-tickets/18.md][#18 - Timezone-aware recurring schedules (IANA city codes, DST)]] (closed 2026-08-11)
 
-**** Status
-
-VALID
-
 **** Tests
 
 - *UT-18.1 - The operator schedules a zoned recurring room on the deployed host; a second device reaches the meeting at the correct local time during a current occurrence and the inactive page outside it. (Operator-confirmed PASS 2026-08-11.)*: *PASS*.
-* Migration notes and footnotes
+
+** Migration notes and footnotes
 
 - *Legacy ledger preamble (history):* "This is the canonical spec. ACs
   introduced from 2026-08-04 onward live here. Pre-cutover ACs remain in their
   originating issues until cited or migrated." Last migrated before this
   conversion: AC18.5 from #18 on 2026-08-11.
 - *Test status legend (source):* ✅ passing · ⏳ pending · ❌ failing · 🚫 removed.
+* Migration record
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+
+** DONE SDLC migration - v1 to v3                      :migration:
+:PROPERTIES:
+:CUSTOM_ID: sdlc-migration
+:MIGRATED: 2026-10-03
+:END:
+
+- *Pre-migration state:* sdlc_v1_state_2026-10-01-2
+- *Migration branch:* sdlc-v3-migration-2026-10-01
+- *Ticket archive:* [[file:archive/migrated-tickets/][Archived ticket corpus]].
+- *Historical requirements:* [[#legacy-acceptance-criteria][Legacy Acceptance Criteria (SDLC v1)]].
+- *Archived v2 work:* Not applicable.
+- *Assumptions:* None recorded by project initialization.
+- *Unresolved items:* None recorded by project initialization.
