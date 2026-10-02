@@ -6,10 +6,10 @@
 
 ** Current phase
 
-- *Phase:* All 21 tickets classified and documentation reconciled; validating before archive commit
+- *Phase:* Complete
 - *Completed tickets:* #1-#21
 - *Next unfinished ticket:* None
-- *Next action:* Validate and commit the migration, close snapshot-open tickets, and record closures
+- *Next action:* Operator decides whether to run =sdlc-init=
 
 ** Archive
 
@@ -50,12 +50,12 @@
 
 ** Closure record
 
-- *Archive commit:* TODO
-- *Closure date:* TODO
-- *Tickets attempted:* TODO
-- *Tickets closed:* TODO
-- *Closure failures:* TODO
-- *Closure-record commit:* TODO
+- *Archive commit:* =3c23d70= (=docs: archive legacy ticket requirements=)
+- *Closure date:* 2026-10-02
+- *Tickets attempted:* 4 (#2 - Chat filename uses epoch date when =startTimestamp= is missing; #3 - Verify transcription upload end-to-end; #6 - Upload meeting video recordings to Cloudflare Stream instead of WebDAV; #21 - Timer chimes drift between clients: server-driven cues, heartbeat re-anchor, mute padding)
+- *Tickets closed:* 4 (#2 - Chat filename uses epoch date when =startTimestamp= is missing; #3 - Verify transcription upload end-to-end; #6 - Upload meeting video recordings to Cloudflare Stream instead of WebDAV; #21 - Timer chimes drift between clients: server-driven cues, heartbeat re-anchor, mute padding)
+- *Closure failures:* None
+- *Closure-record commit:* This commit; use the Git history for its immutable identifier
 
 * Open defects at migration
 
