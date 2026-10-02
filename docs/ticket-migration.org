@@ -21,9 +21,20 @@
 
 ** Suite evidence
 
-- *Command:* Not rerun for this migration
-- *Result:* Operator-directed: classification proceeded from archived recorded evidence without rerunning the regression suite
-- *Evidence source:* Recorded test results and commits in the archive plus =tests/regression= inspection
+- *Command:* =make test=, run once on 2026-10-02 in the terminated session
+  20261002_020457_d0737f; not rerun since
+- *Result:* FAIL. =go vet= clean and every other RT passing. Two
+  regression failures: RT-8.8 - no meet-token references, because the
+  lossless archived ticket snapshots 7, 8, and 10 contain the literal
+  =meet-token= and the test walks all tracked Markdown; and RT-19.6 -
+  bounded create preview, whose expected in-series occurrence
+  (2026-09-15, series ending 2026-09-20) falls before the current date
+  while the preview generates occurrences from the current date
+  (=cmd/meet/main.go:665= passes =now= to =NextOccurrences=).
+- *Evidence source:* Classification proceeded from archived recorded
+  evidence under the operator-directed no-rerun decision recorded before
+  this run. The suite result above was recorded afterwards and did not
+  drive classification.
 
 ** Live RT map
 
@@ -42,7 +53,9 @@
 
 ** Classification checkpoint
 
-- *Delivered:* 17 (#1, #4-#16, #20 closed evidence; #12-#15, #17, #18 with recorded AC migration and suite evidence)
+- *Delivered:* 19 (#1, #4-#21: every archived ticket except the two open
+  defects, each with recorded commit and test evidence; #19 and #21 were
+  delivered under BYPASS-GATE-7 with green recorded runs)
 - *Open defects:* 2 (#2, #3)
 - *Defined but undelivered:* 0
 - *Abandoned:* 0
@@ -93,7 +106,14 @@ Undelivered open defect: live transcription delivery and speaker attribution rem
 
 * Requires human review
 
-- None.
+- RT-8.8 - the lossless ticket archive and the tracked-file walk disagree:
+  the archive must stay lossless while the test forbids =meet-token= in any
+  tracked Markdown. Reconciling the test's scope with the immutable archive
+  is an operator decision; this migration changes neither.
+- RT-19.6 - the bounded create-preview test depends on the current date
+  relative to its fixed 2026-09 series window. Whether the preview or the
+  test's date-independence is at fault needs a decision outside this
+  migration.
 
 * Delivered tickets
 
