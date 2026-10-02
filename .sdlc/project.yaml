@@ -1,0 +1,26 @@
+authorities:
+    architecture:
+        - docs/architecture.md
+    product:
+        - README.md
+        - docs/vision.md
+    requirements:
+        - docs/work.org
+infrastructure:
+    role: consumer
+migration:
+    archive_branch: sdlc_v1_state_2026-10-01-2
+    branch: sdlc-v3-migration-2026-10-01
+    date: "2026-10-01"
+project:
+    kind: application
+    migration_source: v1
+    primary_branch: master
+standards:
+    technologies:
+        - API
+        - GO
+        - JAVASCRIPT
+        - SHELL
+        - WEB
+version: 3

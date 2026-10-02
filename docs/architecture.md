@@ -1,14 +1,19 @@
-<!-- Version: 0.3 | Last updated: 2026-04-30 -->
+---
+title: Architecture
+version: 0.4
+last-updated: 2026-10-02
+---
 
 # Architecture
 
 ## Overview
 
 meet is a single Go binary with several subcommands (`serve`, `token`,
-`create`, `cancel`, `list`) and a companion SSH wrapper (`meet-helper`) for
+`moderator-link`, `create`, `cancel`, `list`) and a companion Secure Shell
+(SSH) wrapper (`meet-helper`) for
 invoking any subcommand on a remote deploy host. The server embeds all
 static assets (HTML template, font) and requires no external runtime
-dependencies.
+assets.
 
 ## Components
 
@@ -25,31 +30,43 @@ dependencies.
                             │
               ┌─────────────┼─────────────┐
               │             │             │
-      ┌───────▼──────┐ ┌───▼───┐  ┌──────▼──────┐
-      │ GET /{room}  │ │/health│  │POST /webhook│
-      │ Meeting page │ │       │  │  /recording │
-      └──────────────┘ └───────┘  └──────┬──────┘
+      ┌───────▼──────┐ ┌───▼────┐  ┌─────▼────────┐
+      │ Room, login, │ │ Timer  │  │ Recording    │
+      │ static pages │ │ HTTP/SSE│  │ webhook      │
+      └──────────────┘ └────────┘  └─────┬────────┘
                                          │
-                                   ┌─────▼─────┐
-                                   │  Download  │ async goroutine
-                                   │  + Upload  │
-                                   └─────┬─────┘
-                                         │
-                                   ┌─────▼─────┐
-                                   │ Nextcloud  │ WebDAV PUT
-                                   │  (remote)  │
-                                   └───────────┘
+                         ┌───────────────┴──────────────┐
+                         │                              │
+                   ┌─────▼─────┐                 ┌──────▼─────┐
+                   │Cloudflare │                 │ Nextcloud  │
+                   │ Stream    │                 │ WebDAV     │
+                   └───────────┘                 └────────────┘
 ```
 
 ## Request flow
 
 ### Meeting page (`GET /{room}`)
 
-1. Extract room name from URL path (or use `default_room` for `/`)
-2. Parse domain from `base_url` for banner rendering
-3. Render embedded HTML template with room name, app-id, domain parts
-4. Client-side JS loads JitsiMeetExternalAPI from 8x8 CDN
-5. If `?jwt=` query param present, pass it to the API (moderator mode)
+1. Accept only a single-segment room path.
+2. Admit the request when the latest append-only room-registry row has an
+   active occurrence, or when a valid moderator JWT authorizes the room.
+3. Return the same non-storable inactive-room HTTP 404 for every blocked slug.
+4. Render the embedded meeting template with the room, application ID, and
+   branded domain.
+5. Pass an optional moderator JWT to the 8x8 client.
+
+`/{room}/moderator` provides a generic login form only while the room is
+active. A preapproved email and room pair receives a signed, expiring,
+single-use verification link. Verification produces a short-lived JWT bound to
+that room. The CLI-generated operator token remains a separate wildcard path.
+
+### Shared timer
+
+Each room has independent in-memory runtime state. Timer settings persist in an
+append-only state file, but active runs reset on service restart. Participants
+subscribe through server-sent events (SSE); moderator-scoped or wildcard JWTs
+authorize control requests. The server emits time-based cues once per run and
+re-broadcasts authoritative state every ten seconds.
 
 ### Webhook (`POST /webhook/recording`)
 
@@ -59,12 +76,14 @@ dependencies.
    `CHAT_UPLOADED`):
    - Check idempotency key against dedup map
    - Respond HTTP 200 immediately
-   - Spawn goroutine for the download/upload pipeline:
-     a. Download file to `{STATE_DIRECTORY}/download/{filename}`
-     b. Upload to Nextcloud via WebDAV PUT
-     c. On success, move file to `{STATE_DIRECTORY}/uploaded/`
-     d. On failure, retry with exponential backoff (1m, 2m, 4m... up to 24h)
-     e. If all retries fail, file remains in `download/` for recovery on restart
+   - Spawn a goroutine for the download/upload pipeline.
+   - Download the file to `{STATE_DIRECTORY}/download/{filename}`.
+   - Upload video to Cloudflare Stream. Record the playback URL in
+     `recordings.csv` and write a Markdown notification to Nextcloud.
+   - Upload transcripts and chat logs directly to Nextcloud through WebDAV.
+   - Move successful local files to `{STATE_DIRECTORY}/uploaded/`.
+   - Retry failures with exponential backoff for up to 24 hours; an exhausted
+     file remains in `download/` for recovery.
 4. For all other events: log and respond HTTP 200
 
 ### Token generation (`meet token`)
@@ -94,24 +113,36 @@ The server uses two forms of state:
 
 **In-memory:** the dedup map (bounded at 1000 entries, evicts oldest) prevents
 reprocessing of duplicate webhook deliveries within a single run. A restart
-clears it, but this is safe - a redelivered webhook after restart will
-re-download and re-upload, which is harmless (WebDAV PUT overwrites).
+clears it. Per-room active timer runs also live in memory and reset on restart.
 
 **On-disk:** the `STATE_DIRECTORY` (systemd's `/var/lib/meet/`) contains two
 subdirectories that form a simple state machine:
 
-- `download/` - files downloaded from 8x8 but not yet uploaded to Nextcloud.
-  Presence of a file here means upload is pending or in retry.
-- `uploaded/` - files successfully uploaded. Kept for 30 days as a local
-  backup, then purged by a daily ticker.
+- `rooms.csv` - append-only room lifecycle and schedule definitions.
+- `recordings.csv` - successful Cloudflare Stream uploads and playback URLs.
+- `timer-settings.csv` - persisted per-room timer configuration.
+- `download/` - files downloaded from 8x8 but not yet uploaded.
+- `uploaded/` - successfully uploaded files retained for the configured local
+  retention period and purged by a daily ticker.
 
 On startup, the server scans `download/` and retries any pending uploads.
 This recovers from crashes, restarts, and deployment-induced service restarts.
 
 ## Security
 
-- Webhook endpoint validates a bearer token configured in secrets
-- Moderator JWT is RS256-signed with a private key stored in secrets
-- No secrets in committed config files - all in age-encrypted YAML
+- The webhook endpoint validates a bearer token configured in secrets.
+- Moderator JWTs are RS256-signed with a private key stored in secrets.
+- Magic-link requests use room-specific email allowlists, generic responses,
+  expiring signatures, and replay prevention.
+- Blocked room slugs share one byte-identical response to avoid room-name
+  enumeration.
+- No secrets are stored in committed config files; deployments use
+  age-encrypted YAML.
 - Caddy handles TLS termination; the app binds to loopback only
 - systemd runs the service with `DynamicUser=yes` and aggressive sandboxing
+
+## Changelog
+
+- **0.4, 2026-10-02:** Reconciled routing, moderator authentication, timer
+  state, and Cloudflare Stream recording archival with the migrated legacy
+  acceptance criteria.

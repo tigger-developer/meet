@@ -1,4 +1,8 @@
-<!-- Version: 0.1 | Last updated: 2026-04-29 -->
+---
+title: Vision
+version: 0.2
+last-updated: 2026-10-02
+---
 
 # Vision
 
@@ -8,22 +12,29 @@ tool with full control over branding, authentication, and data retention.
 
 ## Goals
 
-- **Minimal surface area.** A single Go binary serves the meeting page,
-  handles webhooks, and generates moderator tokens. No database, no
-  background workers, no external dependencies beyond 8x8 and Nextcloud.
+- **Minimal surface area.** A single Go binary serves scheduled meeting rooms,
+  handles webhooks, manages room and timer state, and generates moderator
+  tokens. It uses append-only files rather than a database.
 - **Own your data.** Recordings, transcriptions, and chat logs are
-  automatically archived to a self-hosted Nextcloud instance before the
-  24-hour 8x8 download link expires.
+  automatically downloaded before the 8x8 link expires. Video is retained in
+  Cloudflare Stream, while transcripts, chat logs, and recording-link
+  notifications are retained in a self-hosted Nextcloud instance.
 - **CLI-first administration.** Moderator access is generated via CLI
-  (`meet token`), not a web admin panel. No authentication system to
-  build or maintain for a single-user deployment.
+  (`meet token`) or delivered to a preapproved room moderator through a
+  room-scoped magic link. There is no web administration panel.
 - **Scriptable and composable.** Room names are URL paths. Token generation
-  is a single command. The webhook endpoint is standard HTTP. Everything
-  integrates with shell scripts and automation.
+  and room scheduling are CLI operations. The webhook and timer interfaces use
+  standard HTTP. Everything integrates with shell scripts and automation.
 
 ## Non-goals
 
 - Multi-tenant or multi-user admin (single operator assumed)
 - Custom video infrastructure (delegates to 8x8 JaaS)
 - Mobile apps (the web UI is responsive via JaaS)
-- User accounts or persistent sessions
+- General user accounts or a multi-user administration system
+
+## Changelog
+
+- **0.2, 2026-10-02:** Reconciled the vision with scheduled rooms,
+  room-scoped moderator access, the shared timer, and Cloudflare Stream video
+  archival.
