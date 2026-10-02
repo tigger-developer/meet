@@ -1,13 +1,21 @@
+---
+title: meet
+version: 1.1
+last-updated: 2026-10-02
+---
+
 # meet
 
 Branded 8x8 JaaS (Jitsi as a Service) meeting page. A lightweight Go web app
-that serves video meeting rooms with a branded banner, moderator JWT support,
-and automatic recording/transcription archival to Nextcloud.
+that serves scheduled video meeting rooms with a branded banner, room-scoped
+moderator access, a shared meeting timer, and automatic meeting-artefact
+archival.
 
 Visitors go to `meet.example.com/workshop-april` and join a room. The moderator
 generates a signed JWT URL via the CLI to get admin privileges and can start
-recording from the banner. Recordings, transcriptions, and chat logs are
-automatically downloaded and uploaded to a Nextcloud WebDAV share.
+recording from the banner. Video recordings are uploaded to Cloudflare Stream;
+transcriptions, chat logs, and recording-link notifications are uploaded to a
+Nextcloud WebDAV share.
 
 ## Quickstart
 
@@ -24,7 +32,9 @@ make token ROOM=my-room   # generate a moderator URL
 
 - Go 1.24+
 - 8x8 JaaS account with API key
-- Nextcloud instance with WebDAV access (for recording archival)
+- Cloudflare Stream account (for video archival)
+- Nextcloud instance with WebDAV access (for transcripts, chat logs, and
+  recording-link notifications)
 
 ## CLI
 
@@ -84,19 +94,23 @@ The `--config` flag is still supported for explicit override. For local dev,
 |-------|----------|-------------|
 | `addr` | config | Bind address (default `127.0.0.1:18085`) |
 | `base_url` | config | Public URL, used for banner and token URLs |
-| `default_room` | config | Room name when visiting `/` (default `lobby`) |
-| `default-moderator-name` | config | Display name for moderator tokens (default `Moderator`) |
+| `default-moderator-name` | config | Display name for moderator tokens |
 | `meeting.default-duration` | config | Default occurrence/window length for `meet create` (compound, e.g. `4h`, `4:30h`) |
 | `meeting.default-open-early` | config | Default lead before an occurrence opens (e.g. `15m`) |
-| `recording.webdav-path` | config | WebDAV destination folder for recordings |
+| `recording.webdav.path` | config | WebDAV destination folder for transcripts, chat logs, and recording-link notifications |
+| `recording.player-base-url` | config | Public player base used to form recording playback URLs |
+| `recording.local-retention-days` | config | Local retention after a successful upload (default `14`) |
+| `recording.cloudflare.stream-ttl-days` | config | Cloudflare Stream retention (default `90`) |
 | `8x8-keys.app-id` | secrets | 8x8 JaaS application ID |
 | `8x8-keys.key-id` | secrets | 8x8 API key ID (used as JWT `kid` header) |
 | `8x8-keys.private-key` | secrets | RSA private key PEM for JWT signing |
 | `8x8-keys.public-key` | secrets | RSA public key PEM (not used at runtime) |
-| `recording.webdav-url` | secrets | Nextcloud WebDAV base URL |
-| `recording.webdav-user` | secrets | Nextcloud username |
-| `recording.webdav-password` | secrets | Nextcloud app password |
-| `recording.webhook-token` | secrets | Bearer token for 8x8 webhook auth |
+| `recording.webdav.url` | secrets | Nextcloud WebDAV base URL |
+| `recording.webdav.user` | secrets | Nextcloud username |
+| `recording.webdav.password` | secrets | Nextcloud app password |
+| `recording.webhook-token` | secrets | Bearer token for 8x8 webhook authentication |
+| `recording.cloudflare.account-id` | secrets | Cloudflare account identifier |
+| `recording.cloudflare.api-token` | secrets | Cloudflare Stream API token |
 | `moderator-auth` | secrets | Room-to-moderator email relationships and SMTP credentials |
 
 ## Features
@@ -143,8 +157,13 @@ cloud recording infrastructure. After a meeting ends, 8x8 sends webhook
 events to `POST /webhook/recording`. The server automatically:
 
 - Downloads recordings, transcriptions, and chat logs to a local staging directory
-- Uploads them to Nextcloud via WebDAV with exponential backoff retry (up to 24h)
-- On success, moves files to an `uploaded/` directory (kept for 30 days as local backup)
+- Uploads video recordings to Cloudflare Stream and records their playback URLs in
+  `recordings.csv`
+- Uploads transcriptions, chat logs, and Markdown recording-link notifications
+  to Nextcloud through WebDAV
+- Retries failed uploads with exponential backoff for up to 24 hours
+- On success, moves files to an `uploaded/` directory for the configured local
+  retention period
 - On failure, files remain in `download/` and are retried on next app startup
 - Names files as `{room}_{date}_{time}_{duration}.mp4` (recordings),
   `{room}_{date}_{time}_transcript.{ext}` (transcriptions),
@@ -161,6 +180,14 @@ secrets.
 All participants are set to tile view on join. Participants can manually
 switch back to speaker view if preferred.
 
+### Shared meeting timer
+
+Each room has a server-authoritative timer shown in the meeting banner.
+Moderators can configure and control it; participants receive the same state
+through server-sent events. The server emits time-based audio cues once per run
+and sends a heartbeat every ten seconds to re-anchor clients. Timer settings
+persist across restarts, while an active run does not.
+
 ## Important files
 
 | Path | Purpose |
@@ -169,6 +196,7 @@ switch back to speaker view if preferred.
 | `cmd/meet-helper/main.go` | SSH wrapper for invoking any meet subcommand on a remote host |
 | `internal/server/server.go` | HTTP server, routing, domain parsing |
 | `internal/server/webhook.go` | Webhook handler, download/upload pipeline |
+| `internal/server/timer.go` | Shared per-room timer state and server-fired cues |
 | `internal/server/static/index.html` | Meeting page template (embedded) |
 | `internal/server/static/SpecialElite-Regular.woff2` | Banner font (embedded) |
 | `config/defaults.yaml` | Default config |

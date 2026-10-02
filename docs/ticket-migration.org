@@ -1,0 +1,118 @@
+#+TITLE: Legacy ticket migration
+#+DATE: 2026-10-02
+#+OPTIONS: toc:2
+
+* Migration state and evidence
+
+** Current phase
+
+- *Phase:* All 21 tickets classified and documentation reconciled; validating before archive commit
+- *Completed tickets:* #1-#21
+- *Next unfinished ticket:* None
+- *Next action:* Validate and commit the migration, close snapshot-open tickets, and record closures
+
+** Archive
+
+- *Repository:* tigger-developer/meet
+- *Snapshot:* 2026-10-02, 21 issues (17 closed, 4 open)
+- *Manifest:* [[file:archive/migrated-tickets/manifest.json][migrated-tickets/manifest.json]]
+- *Coverage:* All 21 actual issues, open and closed; pull requests excluded
+- *Verification:* Comment pagination matched each issue's declared count; timeline arrays complete
+
+** Suite evidence
+
+- *Command:* Not rerun for this migration
+- *Result:* Operator-directed: classification proceeded from archived recorded evidence without rerunning the regression suite
+- *Evidence source:* Recorded test results and commits in the archive plus =tests/regression= inspection
+
+** Live RT map
+
+- *Maintained harness:* =go test ./tests/regression/...= under =make test=; 223 test functions in =tests/regression=
+- *Before reconciliation:* 292 distinct RT/UT identifiers referenced by harness functions and comments
+- *Traceability repairs:* RT-21.1 through RT-21.7 attached to AC15.7, AC15.12, and AC15.15; RT-19.1 through RT-19.4 traced to #19; superseded RT-13.7 and RT-13.14 confirmed removed in the harness
+- *Reconciled checksum:* Every harness RT/UT identifier resolves to a ledger AC or a superseded entry; no unresolved orphans
+
+** Ledger and documentation reconciliation
+
+- *Canonical ledger:* =docs/ACs.org= (converted losslessly from =docs/ACs.md=; =docs/ACs.md= removed)
+- *Legacy additions:* AC1.1-AC1.9, AC4.1-AC4.3, AC6.1-AC6.8, AC7.1-AC7.8, AC8.1-AC8.5, AC9.1, AC10.1-AC10.6, AC11.1-AC11.2
+- *Heuristic markings:* None required; every migrated ticket had recorded evidence
+- *Documentation changes:* =README.md=, =docs/vision.md=, and =docs/architecture.md= reconciled with the time-bound room registry, room-scoped moderator access, shared timer, and Cloudflare Stream recording flow
+- *Implementation-plan archival:* No =docs/implementation?plan.md= source exists; nothing to move
+
+** Classification checkpoint
+
+- *Delivered:* 17 (#1, #4-#16, #20 closed evidence; #12-#15, #17, #18 with recorded AC migration and suite evidence)
+- *Open defects:* 2 (#2, #3)
+- *Defined but undelivered:* 0
+- *Abandoned:* 0
+- *Requires human review:* 0
+
+** Closure record
+
+- *Archive commit:* TODO
+- *Closure date:* TODO
+- *Tickets attempted:* TODO
+- *Tickets closed:* TODO
+- *Closure failures:* TODO
+- *Closure-record commit:* TODO
+
+* Open defects at migration
+
+** [[file:archive/migrated-tickets/2.md][#2 - Chat filename uses epoch date when startTimestamp is missing]]
+
+*** Snapshot state
+
+Open.
+
+*** Evidence
+
+Production evidence dated 2026-06-10 records a =CHAT_UPLOADED= artefact whose missing =startTimestamp= produced a Unix-epoch filename. No delivery evidence or linked commit is recorded.
+
+*** Disposition
+
+Undelivered open defect: when =startTimestamp= is absent or zero, use the webhook =timestamp= for the chat filename.
+
+** [[file:archive/migrated-tickets/3.md][#3 - Verify transcription upload end-to-end]]
+
+*** Snapshot state
+
+Open.
+
+*** Evidence
+
+Production verification dated 2026-06-10 produced recording and chat artefacts but no transcription artefact. UT-1.2 - live transcription delivery therefore remains PENDING.
+
+*** Disposition
+
+Undelivered open defect: live transcription delivery and speaker attribution remain unverified.
+
+* Defined but undelivered features
+
+- None.
+
+* Requires human review
+
+- None.
+
+* Delivered tickets
+
+- [[file:archive/migrated-tickets/1.md][#1 - Download recordings, transcriptions, and chat logs at end of session]]
+- [[file:archive/migrated-tickets/4.md][#4 - ADDR env var takes precedence over addr in config]]
+- [[file:archive/migrated-tickets/5.md][#5 - Operator display name leaks to guests on plain meeting URLs]]
+- [[file:archive/migrated-tickets/6.md][#6 - Upload meeting video recordings to Cloudflare Stream instead of WebDAV]]
+- [[file:archive/migrated-tickets/7.md][#7 - Server-side time-bound room registry with CLI subcommands]]
+- [[file:archive/migrated-tickets/8.md][#8 - Replace meet-token with generalized meet-helper SSH shim]]
+- [[file:archive/migrated-tickets/9.md][#9 - Migrate meet's per-subcommand help text to docs/help/]]
+- [[file:archive/migrated-tickets/10.md][#10 - Retarget meet-helper for NixOS-only deployments]]
+- [[file:archive/migrated-tickets/11.md][#11 - Load defaults.yaml beside CONFIG_PATH for NixOS deploy-nix]]
+- [[file:archive/migrated-tickets/12.md][#12 - Room-scoped moderator magic links]]
+- [[file:archive/migrated-tickets/13.md][#13 - Inactive-room page for gated meeting slugs]]
+- [[file:archive/migrated-tickets/14.md][#14 - Gate moderator entry on active room; relabel to Login]]
+- [[file:archive/migrated-tickets/15.md][#15 - Shared per-room meeting timer with phase colours and chimes]]
+- [[file:archive/migrated-tickets/16.md][#16 - Remove version tagging from Makefile release target]]
+- [[file:archive/migrated-tickets/17.md][#17 - Recurring meeting-room schedules in the registry]]
+- [[file:archive/migrated-tickets/18.md][#18 - Timezone-aware recurring schedules (IANA city codes, DST)]]
+- [[file:archive/migrated-tickets/19.md][#19 - List upcoming occurrences: create-time preview and meet list --room]]
+- [[file:archive/migrated-tickets/20.md][#20 - Simplify create date/time: --from is a date, --at mandatory, drop --until]]
+- [[file:archive/migrated-tickets/21.md][#21 - Timer chimes drift between clients: server-driven cues, heartbeat re-anchor, mute padding]]
