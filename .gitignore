@@ -41,3 +41,7 @@ cmd/meet/help-*.txt
 # Timer chime assets (#15) are legitimate embedded project media; re-include
 # them despite the global *.mp3 ignore in the user's git template.
 !internal/server/static/sounds/*.mp3
+!internal/server/static/start.mp3
+!internal/server/static/warning.mp3
+!internal/server/static/end-timer.mp3
+!internal/server/static/over-time.mp3

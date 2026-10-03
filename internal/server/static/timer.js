@@ -18,17 +18,14 @@ window.initTimer = (api, jwt) => {
 
     // --- audio cues ---
     const sounds = {
-        start: new Audio('/static/sounds/timer-start.m4a'),
-        pause: new Audio('/static/sounds/pause.m4a'),
-        resume: new Audio('/static/sounds/un-pause.m4a'),
-        warning: new Audio('/static/sounds/early-warning.mp3'),
-        end: new Audio('/static/sounds/timer-end.mp3'),
-        graceEnd: new Audio('/static/sounds/grace-end-period.mp3'),
+        start: new Audio('/static/start.mp3'),
+        resume: new Audio('/static/start.mp3'),
+        warning: new Audio('/static/warning.mp3'),
+        end: new Audio('/static/end-timer.mp3'),
+        graceEnd: new Audio('/static/over-time.mp3'),
     };
 
-    // Cues play at a reduced volume so they carry without being harsh (#21).
-    const CUE_VOLUME = 0.66;
-    Object.values(sounds).forEach((audio) => { audio.volume = CUE_VOLUME; });
+    Object.values(sounds).forEach((audio) => { audio.volume = 1; });
 
     // Arm audio on the first available user gesture / join so a later cue is not
     // blocked by the browser autoplay policy.
@@ -56,18 +53,86 @@ window.initTimer = (api, jwt) => {
     document.addEventListener('keydown', armAudio, { once: true });
     api.addEventListener('videoConferenceJoined', armAudio);
 
-    // Play a cue, muting this participant's own microphone around it so the cue
-    // is not captured and re-broadcast (issue #15, AC15.15). The mute is applied
-    // BEFORE the sound and padded either side so no opening sliver leaks, and it
-    // is restored only when this client did the muting and the operator has not
-    // altered the mic in the meantime (issue #21).
-    const CUE_PAD_MS = 300;
+    // Overlapping cues share one mute owner. The last playback completion
+    // restores the mic, unless a later mute-status change relinquished ownership.
+    let cueSession = null;
 
-    const startAudio = (audio) => {
-        audio.currentTime = 0;
-        const p = audio.play();
-        if (p && p.catch) {
-            p.catch(() => {});
+    const prepareMute = async (session) => {
+        if (await api.isAudioMuted()) {
+            return; // An already-muted microphone must stay muted.
+        }
+        await new Promise((resolve, reject) => {
+            let confirmed = false;
+            const timeout = setTimeout(() => {
+                session.restore = false; // Unknown mic state: never toggle blindly.
+                reject(new Error('microphone mute confirmation timed out'));
+            }, 3000);
+            session.onMuteChange = ({ muted }) => {
+                if (!confirmed && muted) {
+                    confirmed = true;
+                    clearTimeout(timeout);
+                    resolve();
+                } else {
+                    session.restore = false;
+                }
+            };
+            api.addEventListener('audioMuteStatusChanged', session.onMuteChange);
+            session.restore = true;
+            try {
+                api.executeCommand('toggleAudio');
+            } catch (err) {
+                clearTimeout(timeout);
+                session.restore = false;
+                reject(err);
+            }
+        });
+    };
+
+    const releaseMute = (session) => {
+        session.count -= 1;
+        if (session.count !== 0) {
+            return;
+        }
+        cueSession = null;
+        if (session.onMuteChange) {
+            api.removeEventListener('audioMuteStatusChanged', session.onMuteChange);
+        }
+        if (session.restore) {
+            // Use the last observed state: no extra query or pad
+            // between the final audio event and the restore command.
+            try {
+                api.executeCommand('toggleAudio');
+            } catch (err) {
+                console.error('timer cue could not restore microphone', err);
+            }
+        }
+    };
+
+    const startAudio = (audio, finish) => {
+        const stopEvents = ['ended', 'error', 'abort', 'pause', 'stalled'];
+        let finished = false;
+        const stop = (event) => {
+            if (finished) {
+                return;
+            }
+            finished = true;
+            stopEvents.forEach((name) => audio.removeEventListener(name, stop));
+            audio.pause();
+            if (event && ['error', 'abort', 'stalled'].includes(event.type)) {
+                console.error('timer cue interrupted', event.type, audio.src);
+            }
+            finish();
+        };
+        stopEvents.forEach((name) => audio.addEventListener(name, stop));
+        try {
+            audio.currentTime = 0;
+            audio.play().catch((err) => {
+                console.error('timer cue playback failed', err);
+                stop();
+            });
+        } catch (err) {
+            console.error('timer cue playback failed', err);
+            stop();
         }
     };
 
@@ -75,47 +140,18 @@ window.initTimer = (api, jwt) => {
         if (!audio) {
             return;
         }
-        if (!api || !api.isAudioMuted) {
-            startAudio(audio);
-            return;
+        if (!cueSession) {
+            cueSession = { count: 0, restore: false, onMuteChange: null };
+            cueSession.ready = prepareMute(cueSession);
         }
-        api.isAudioMuted().then((muted) => {
-            if (muted) {
-                startAudio(audio); // already muted (e.g. by the moderator): nothing leaks
-                return;
-            }
-            muteThenPlay(audio);
-        }).catch(() => startAudio(audio));
-    };
-
-    const muteThenPlay = (audio) => {
-        api.executeCommand('toggleAudio'); // mute before the sound
-        // Our own toggle raises one mute-status change; a further change means
-        // the operator altered this mic, so we leave it as they set it.
-        let changes = 0;
-        const onMuteChange = () => { changes += 1; };
-        api.addEventListener('audioMuteStatusChanged', onMuteChange);
-
-        let restored = false;
-        const restore = () => {
-            if (restored) {
-                return;
-            }
-            restored = true;
-            api.removeEventListener('audioMuteStatusChanged', onMuteChange);
-            audio.removeEventListener('ended', onEnded);
-            if (changes <= 1) {
-                api.isAudioMuted().then((m) => {
-                    if (m) {
-                        api.executeCommand('toggleAudio'); // unmute: restore
-                    }
-                }).catch(() => {});
-            }
-        };
-        const onEnded = () => setTimeout(restore, CUE_PAD_MS);
-        audio.addEventListener('ended', onEnded);
-        setTimeout(() => startAudio(audio), CUE_PAD_MS); // pad before the sound
-        setTimeout(restore, 15000); // safety net if 'ended' never fires
+        const session = cueSession;
+        session.count += 1;
+        session.ready.then(() => {
+            startAudio(audio, () => releaseMute(session));
+        }).catch((err) => {
+            console.error('timer cue could not mute microphone', err);
+            releaseMute(session);
+        });
     };
 
     // --- phase computation (mirror of the server) ---
@@ -206,9 +242,7 @@ window.initTimer = (api, jwt) => {
         if (!isActive) {
             return;
         }
-        if (from.running && !to.running) {
-            playCue(sounds.pause);
-        } else if (!from.running && to.running) {
+        if (!from.running && to.running) {
             playCue(sounds.resume);
         }
         // The time-based cues (warning, end, grace-end) are played on the

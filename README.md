@@ -1,7 +1,7 @@
 ---
 title: meet
-version: 1.1
-last-updated: 2026-10-02
+version: 1.2
+last-updated: 2026-10-03
 ---
 
 # meet
@@ -188,6 +188,22 @@ through server-sent events. The server emits time-based audio cues once per run
 and sends a heartbeat every ten seconds to re-anchor clients. Timer settings
 persist across restarts, while an active run does not.
 
+Timer sounds play at full application volume:
+
+| Event | Sound |
+|-------|-------|
+| Start or resume | `start.mp3` |
+| Pause | Silent |
+| Early warning | `warning.mp3` |
+| Timer end | `end-timer.mp3` |
+| Grace expiry | `over-time.mp3` |
+
+An unmuted microphone is muted before playback and restored as soon as the
+sound ends, without fixed padding. Already-muted microphones stay muted.
+Overlapping sounds retain the mute until the last sound ends; intervening
+microphone state changes cancel automatic restoration. Playback failure also
+releases the cue's mute. Browser and system volume controls still apply.
+
 ## Important files
 
 | Path | Purpose |
@@ -208,6 +224,11 @@ persist across restarts, while an active run does not.
 
 Deployed via `deploy-app` from the hetzner deploy toolchain. The Makefile
 contains local dev targets only - no deploy, SSH, or systemd targets.
+
+## Changelog
+
+- **1.2, 2026-10-03:** Replaced timer sounds, made pause silent, restored full
+  application volume and tied microphone restoration to playback completion.
 
 ## Licence
 

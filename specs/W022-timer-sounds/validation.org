@@ -1,0 +1,47 @@
+#+TITLE: W022 - Timer sound validation
+#+STARTUP: overview
+#+TODO: AMBER RED | GREEN
+
+* User validation
+** AMBER UT022.1 - Audible cue mapping and volume :testdef:
+:PROPERTIES:
+:CUSTOM_ID: ut-022-1
+:REASON: Live two-participant browser validation has not been performed.
+:END:
+- Method :: User validation using the procedure in spec.org.
+
+** AMBER UT022.2 - Microphone lifecycle and failures :testdef:
+:PROPERTIES:
+:CUSTOM_ID: ut-022-2
+:REASON: Live microphone timing, overlap and failure validation has not been performed.
+:END:
+- Method :: User validation using the procedure in spec.org.
+
+* Local checks 2026-10-03
+- Candidate :: =5cdebc7655fd93b12659134fcd2b82963ec5c2ce= plus the W022 timer
+  client, four supplied MP3s, ignore exceptions and documentation changes.
+- Environment :: macOS; existing Go 1.26.3 toolchain; inherited PATH. Go build
+  cache was isolated in an operating-system temporary directory.
+- JavaScript check :: =oxlint --deny-warnings internal/server/static/timer.js=
+  exited 0. This establishes static checks, not live audio behaviour.
+- Regression command :: =make test= exited 2. =go vet ./...= passed and all
+  43 timer regression functions passed. Two other tests failed:
+  - RT-8.8 - no obsolete helper references: preserved archived issues 7, 8 and
+    10 contain the historical command name.
+  - RT-19.6 - bounded create preview: the fixed September 2026 fixture is past
+    its series end, yielding no upcoming occurrences.
+  These same failures are recorded in =docs/ticket-migration.org=. Neither the
+  affected tests nor their production paths were changed by this work.
+- Security check :: =govulncheck ./...= exited 3. Nine called standard-library
+  vulnerabilities were reported in Go 1.26.3: GO-2026-6218 (URL path complexity),
+  GO-2026-6091 (template JavaScript regexp context), GO-2026-6090 (TLS handshake
+  bounds), GO-2026-6089 (HTTP/2 header timeout), GO-2026-5972 (ASN.1 recursion),
+  GO-2026-5856 (Encrypted Client Hello privacy), GO-2026-5039 (textproto error
+  escaping), GO-2026-5037 (hostname parsing complexity), and GO-2026-5026
+  (Punycode validation). The scanner reports Go 1.26.6 as covering all fixes.
+- Media inspection :: =ffprobe= recognizes all supplied MP3s. Durations:
+  start 0.470438 s, warning 1.266417 s, end 0.792000 s, overtime 1.228208 s.
+- Review prerequisite :: Repository-wide regression and security checks have
+  not passed. Independent review cannot be invoked under the current mandatory
+  preconditions; the unrelated failures require a separate authorized change.
+- Live evidence :: No browser or deployment verification performed.

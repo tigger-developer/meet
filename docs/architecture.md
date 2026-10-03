@@ -1,7 +1,7 @@
 ---
 title: Architecture
-version: 0.4
-last-updated: 2026-10-02
+version: 0.5
+last-updated: 2026-10-03
 ---
 
 # Architecture
@@ -67,6 +67,16 @@ append-only state file, but active runs reset on service restart. Participants
 subscribe through server-sent events (SSE); moderator-scoped or wildcard JWTs
 authorize control requests. The server emits time-based cues once per run and
 re-broadcasts authoritative state every ten seconds.
+
+The browser owns cue playback and temporary local microphone muting. It waits
+for microphone mute confirmation before sound, and restores on playback
+completion without fixed padding. Concurrent cues share mute ownership until
+the last playback finishes. Already-muted microphones and later microphone
+state changes are respected. Playback errors release ownership; missing mute
+confirmation skips playback and logs an error instead of guessing the state.
+The external API cannot distinguish an unchanged mute state reasserted by a
+moderator. Sound mapping and live validation are defined in
+[W022 - Timer sounds](../specs/W022-timer-sounds/spec.org).
 
 ### Webhook (`POST /webhook/recording`)
 
@@ -142,6 +152,9 @@ This recovers from crashes, restarts, and deployment-induced service restarts.
 - systemd runs the service with `DynamicUser=yes` and aggressive sandboxing
 
 ## Changelog
+
+- **0.5, 2026-10-03:** Described playback-bound microphone ownership and its
+  external API limitation.
 
 - **0.4, 2026-10-02:** Reconciled routing, moderator authentication, timer
   state, and Cloudflare Stream recording archival with the migrated legacy

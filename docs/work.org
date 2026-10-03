@@ -79,6 +79,20 @@ classification; it is provenance, not current state.
 
 * Work items
 
+** BLOCKED W022 - Timer sounds and playback-bound microphone muting :feature:
+:PROPERTIES:
+:CUSTOM_ID: w-022
+:PRIORITY: P1
+:SOURCE: operator
+:CREATED: 2026-10-03
+:END:
+
+- *Specification:* [[file:../specs/W022-timer-sounds/spec.org][W022 - Timer sounds and microphone muting]].
+- *Validation:* [[file:../specs/W022-timer-sounds/validation.org][W022 - Timer sound validation]].
+- *Audit evidence:* [[file:../specs/W022-timer-sounds/audits.yaml][W022 - Independent audit records]].
+- *Blocker:* Repository-wide regression and security checks fail; see the
+  validation record for the two existing test failures and Go toolchain findings.
+
 ** TODO W002 - Chat filename uses epoch date when startTimestamp is missing :defect:legacy:
 :PROPERTIES:
 :CUSTOM_ID: w-002
@@ -1330,6 +1344,10 @@ The banner presents moderators the phase-appropriate controls (stopped: Set, Sta
 
 *** VALID AC15.12 - Chimes play at each timer event with audio armed on join
 
+- *Amendment:* [[file:../specs/W022-timer-sounds/spec.org][W022 - Timer sounds]]
+  replaces the pause sound and sound mapping below. The original requirement
+  and historical validation remain preserved here.
+
 **** Requirement
 
 Every participant hears a start chime when the timer starts, a pause chime when it is paused, a resume chime when it resumes, the early-warning ding on entering the amber phase, the end chime at the total, and the end-of-grace chime when the grace limit passes, with audio armed on join so the first cue is not suppressed by the browser.
@@ -1381,6 +1399,10 @@ On a narrow (mobile) viewport the active timer and its controls remain usable wi
 - *UT-15.10 - The non-moderator banner with an active timer remains usable at a phone width without obscuring the domain.*: *PASS*.
 
 *** VALID AC15.15 - An unmuted microphone is muted for each chime and restored afterwards
+
+- *Amendment:* [[file:../specs/W022-timer-sounds/spec.org][W022 - Timer sounds]]
+  removes pause audio and the later mute padding, preserving restoration on
+  playback completion and already-muted microphones.
 
 **** Requirement
 

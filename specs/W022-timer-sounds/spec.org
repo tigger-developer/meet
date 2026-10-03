@@ -1,0 +1,155 @@
+#+TITLE: W022 - Timer sounds and playback-bound microphone muting
+#+SCHEMA: 8
+#+STARTUP: overview
+#+OPTIONS: toc:2 num:nil
+#+OPERATOR_SIGNOFF: PENDING
+
+* Synopsis
+:PROPERTIES:
+:CUSTOM_ID: summary
+:END:
+** Outcome
+- Timer cues use the supplied sounds at *full volume*, with *silent pause*.
+** Before
+- Six older sounds played at 66% volume, with 300 ms mute padding and a
+  fixed 15-second restoration fallback.
+** After
+- Start and resume use =start.mp3=; warning uses =warning.mp3=; end uses
+  =end-timer.mp3=; grace expiry uses =over-time.mp3=.
+- Microphone restoration follows *playback completion*, without padding.
+** Changes
+- Replace client sound mappings and mute lifecycle; include the four supplied
+  MP3s in version control.
+** Unchanged
+- Server timer state, cue delivery, authorization and already-muted microphones.
+** Edge cases
+- Playback failure releases a cue's mute ownership. Overlapping cues retain
+  the mute until the last finishes. Later microphone changes cancel restoration.
+** Decisions
+- Resume reuses the supplied start sound. Existing unused sounds remain intact.
+- Real browser audio and JaaS microphone interaction require *user validation*.
+** Next step
+- Emergency delivery evidence, retrospective review and live user validation
+  precede closure.
+
+* Context
+** Scope and authority
+- Delivery authority :: =BYPASS-GATE-7=, 2026-10-03. This is the retrospective
+  durable record of the bounded timer-audio change, not advance sign-off.
+- Temporary specification :: Pause is silent; use the four named supplied MP3s
+  at full volume; mute before playback and unmute immediately afterwards
+  instead of using a fixed mute duration.
+- Product :: [[file:../../README.md][README shared meeting timer]] and
+  [[file:../../docs/vision.md][Project vision]].
+- Architecture :: [[file:../../docs/architecture.md][Application architecture]].
+- Baseline :: [[file:../../docs/work.org][Legacy timer requirements]],
+  [[file:../../docs/archive/migrated-tickets/15.md][Shared timer design]], and
+  [[file:../../docs/archive/migrated-tickets/21.md][Server cues and mute padding]].
+- Supersession :: Replaces the pause sound and sound mapping in AC15.12 - timer
+  cues, and the padding implementation of AC15.15 - microphone restoration.
+  The historical records remain preserved.
+- Exclusions :: No server logic, deployment, scheduling, recording, access,
+  dependency, UI layout or test-architecture change.
+
+* Acceptance Criteria
+** AC022.1 - Silent pause and full-volume supplied sounds :ac:
+:PROPERTIES:
+:CUSTOM_ID: ac-022-1
+:END:
+- Criterion :: Pause produces *no sound or new microphone mute*. Start and
+  resume play =start.mp3=, warning plays =warning.mp3=, timer end plays
+  =end-timer.mp3=, and grace expiry plays =over-time.mp3= at *volume 1*.
+  Browser and system output-volume settings remain external controls.
+- Proven by :: [[#ut-022-1][UT022.1 - Audible cue mapping and volume]].
+
+** AC022.2 - Microphone mute follows playback :ac:
+:PROPERTIES:
+:CUSTOM_ID: ac-022-2
+:END:
+- Criterion :: A currently unmuted microphone is muted *before playback* and
+  restoration is requested *immediately when playback ends*, with no fixed
+  pre/post padding or playback-duration timer. Already-muted microphones
+  remain muted. Observable intervening microphone changes are respected.
+- Proven by :: [[#ut-022-2][UT022.2 - Microphone lifecycle and failures]].
+
+* Test Definitions
+- Evidence selection :: No new RT is justified: this delta affects browser
+  playback and the external JaaS microphone, which the existing timer design
+  verifies through UTs. The existing Go regression pack exercises server HTTP
+  and SSE behaviour; source searches or invented JaaS simulations would not
+  prove the changed behaviour. No new browser framework is introduced.
+
+** UT022.1 - Audible cue mapping and volume :testdef:
+:PROPERTIES:
+:CUSTOM_ID: ut-022-1
+:END:
+- Covers :: [[#ac-022-1][AC022.1 - Silent pause and full-volume supplied sounds]].
+- Method :: User validation in Firefox with two meeting participants.
+- Procedure :: Join, start a short timer, pause, resume, and let warning, end
+  and grace expiry occur. Compare each cue against its supplied MP3. Inspect
+  playback volume in browser developer tools; it must be 1 for each element.
+- Expected :: Correct sounds on both clients, *silent pause*, no pause-induced
+  mute, first cue audible after joining, and no application attenuation.
+
+** UT022.2 - Microphone lifecycle and failures :testdef:
+:PROPERTIES:
+:CUSTOM_ID: ut-022-2
+:END:
+- Covers :: [[#ac-022-2][AC022.2 - Microphone mute follows playback]].
+- Method :: User validation in a two-participant Firefox meeting.
+- Procedure :: Exercise each cue with microphone initially unmuted and muted.
+  Listen from the second client for rebroadcast. Exercise overlapping end/grace
+  cues with zero grace, rapid pause/resume, and manual mute changes during sound.
+  Block a sound request in developer tools, then separately interrupt playback
+  or cause an audio error. Repeat with autoplay denied.
+- Expected :: Mute precedes sound; restore is requested at final playback end
+  without padding. Already-muted or manually changed microphones remain as set.
+  Playback rejection, error, abort, pause or stall releases cue ownership;
+  overlapping playback does not restore early or toggle twice.
+- Limitation :: The external API reports state changes, not the identity or
+  intent of the actor. Reasserting an unchanged mute state is not observable.
+  If mute confirmation times out, playback is skipped and an error is logged;
+  the client does not guess the microphone state by toggling it.
+
+* Edge Cases
+- External mute confirmation has a bounded three-second timeout, *not a
+  playback duration*. API failure is reported; no sound starts without a
+  successful state check or mute confirmation.
+- Browser autoplay and operating-system volume remain external constraints.
+
+* Solution Design
+- Existing client :: =internal/server/static/timer.js= owns cue mapping and
+  one shared mute session for concurrent sounds. No new runtime or dependency.
+- Sequence :: Query initial mute state; if necessary subscribe to
+  =audioMuteStatusChanged= before =toggleAudio= and wait for confirmation;
+  play; release on audio termination or rejected =play()=; restore on final
+  release only while the client still owns the mute.
+- State :: Session reference count prevents an overlapping cue from restoring
+  the microphone prematurely. A subsequent microphone state event relinquishes
+  restoration. Audio handlers are removed on termination.
+- Assets :: Existing supplied files under =internal/server/static/= are served
+  by the existing embedded static-file handler. Exact ignore exceptions retain
+  them in Git without moving or altering the supplied media.
+- External contract :: [[https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-iframe-events/][Jitsi audio mute events]],
+  [[https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-iframe-functions/][Jitsi mute query]],
+  [[https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-iframe-commands/][Jitsi toggle command]].
+- Structural verification :: Review ownership, event cleanup, mappings, volume
+  and the absence of playback-duration restoration timers; use installed
+  JavaScript linting and existing Go checks for local validation.
+** Security impact
+- Authorization, network destinations, secrets and stored data are unchanged.
+  No new privilege or microphone access is requested. Previously muted audio
+  stays muted; uncertain mute state is never blindly toggled.
+
+* Delivery Handoff
+:PROPERTIES:
+:CUSTOM_ID: delivery-handoff
+:END:
+- Required reading :: This record, =.sdlc/project.yaml=, and the linked baseline.
+- Entry conditions :: Emergency implementation under the recorded bounded scope.
+- Documentation :: README cue table and architecture mute lifecycle are updated;
+  the legacy ledger links the superseding delta. Vision and embed setup are
+  unaffected by the audio-only change.
+- Audit evidence :: [[file:audits.yaml][Independent audit records]].
+- Validation :: [[file:validation.org][Local checks and user validation]].
+- Closure :: Requires current user-test evidence and an explicit closure decision.
