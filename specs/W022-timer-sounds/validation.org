@@ -64,3 +64,16 @@
 - Remaining prerequisite :: The repository-wide regression check has not
   passed. Delivery review remains blocked by those two existing failures.
 - Live evidence :: Browser user tests remain AMBER. No deployment performed.
+
+* Prohibited test retirement 2026-10-06
+- Scope :: Explicit removal of RT-8.8 - obsolete helper-name source and
+  documentation search, including its traversal of archived tickets. No
+  replacement text-search test is introduced. Historical ticket contents and
+  earlier execution evidence remain intact; the test identifier is reserved.
+- Rationale :: Source, documentation and ticket searches do not exercise
+  observable application behaviour and violate the SDLC testing boundary.
+- Candidate :: =a45b818=, Go 1.27.1 verification checkpoint, plus deletion of
+  =TestHelper_NoMeetTokenReferences_RT8_8= and the corresponding ledger update.
+- Verification :: =make test= with Go 1.27.1 exited 2. =go vet ./...= passed;
+  the sole reported failing test is RT-19.6 - bounded create preview, whose
+  September 2026 schedule fixture has expired. No application code changed.

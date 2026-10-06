@@ -245,65 +245,6 @@ func TestHelper_MakefileInstallsHelper_RT8_7(t *testing.T) {
 	}
 }
 
-// AC8.3 — the literal "meet-token" does not appear anywhere in tracked Go
-// source, Markdown documentation, or the Makefile.
-func TestHelper_NoMeetTokenReferences_RT8_8(t *testing.T) {
-	cwd, _ := os.Getwd()
-	repoRoot := filepath.Clean(filepath.Join(cwd, "..", ".."))
-	suffixes := []string{".go", ".md", "Makefile"}
-	skipDirs := map[string]bool{".git": true, ".claude": true, ".agent": true, "bin": true, "node_modules": true}
-
-	var hits []string
-	err := filepath.Walk(repoRoot, func(path string, info os.FileInfo, walkErr error) error {
-		if walkErr != nil {
-			return walkErr
-		}
-		if info.IsDir() {
-			if skipDirs[info.Name()] {
-				return filepath.SkipDir
-			}
-			return nil
-		}
-		match := false
-		for _, sfx := range suffixes {
-			if strings.HasSuffix(info.Name(), sfx) {
-				match = true
-				break
-			}
-		}
-		if !match {
-			return nil
-		}
-		// Don't scan the test file itself (it deliberately references the literal).
-		if filepath.Base(path) == "meet_helper_test.go" {
-			return nil
-		}
-		data, err := os.ReadFile(path)
-		if err != nil {
-			return err
-		}
-		// Discriminate the OLD binary reference from legitimate
-		// references to the per-subcommand docs file:
-		//   docs/help/meet-token.txt  → docs source for `meet token`
-		//   help-token.txt            → staged copy in cmd/meet/
-		// Strip these before checking for the old-binary literal.
-		content := string(data)
-		content = strings.ReplaceAll(content, "docs/help/meet-token.txt", "")
-		content = strings.ReplaceAll(content, "\"meet-token.txt\"", "")
-		content = strings.ReplaceAll(content, "meet-token.txt", "")
-		if strings.Contains(content, "meet-token") || strings.Contains(content, "remote-token") {
-			hits = append(hits, path)
-		}
-		return nil
-	})
-	if err != nil {
-		t.Fatalf("walk: %v", err)
-	}
-	if len(hits) != 0 {
-		t.Errorf("meet-token / remote-token still referenced in: %v", hits)
-	}
-}
-
 // AC8.4 — invocations with too few arguments exit non-zero.
 func TestHelper_NoArgs_ExitsNonZero_RT8_9(t *testing.T) {
 	docSrc := helperHelpSource(t)

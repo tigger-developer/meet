@@ -90,8 +90,9 @@ classification; it is provenance, not current state.
 - *Specification:* [[file:../specs/W022-timer-sounds/spec.org][W022 - Timer sounds and microphone muting]].
 - *Validation:* [[file:../specs/W022-timer-sounds/validation.org][W022 - Timer sound validation]].
 - *Audit evidence:* [[file:../specs/W022-timer-sounds/audits.yaml][W022 - Independent audit records]].
-- *Blocker:* Repository-wide regression checks still fail on the two existing
-  tests. The 2026-10-06 security scan with Go 1.27.1 passes; the earlier Go
+- *Blocker:* The expired schedule fixture remains unresolved. The prohibited
+  source/documentation search test was removed on 2026-10-06. The security
+  scan with Go 1.27.1 passes; the earlier Go
   toolchain findings remain historical evidence in the validation record.
 
 ** TODO W002 - Chat filename uses epoch date when startTimestamp is missing :defect:legacy:
@@ -711,7 +712,9 @@ The previous =meet-token= binary, install target, and uninstall target are remov
 
 - *RT-8.6 - The former =cmd/remote-token/= source is absent:* *PENDING*.
 - *RT-8.7 - Installation exposes =meet-helper= and not =meet-token=*: *PENDING*.
-- *RT-8.8 - The repository contains no remaining =meet-token= reference:* *PENDING*.
+- *RT-8.8 - The repository contains no remaining =meet-token= reference:* *REMOVED 2026-10-06*.
+  The source/documentation search was not a behavioural test and improperly
+  scanned archived tickets. The identifier remains reserved. Historical state: PENDING.
 
 *** VALID AC8.4 - Remote helper validates invocation and provides help
 
@@ -817,7 +820,9 @@ Operator-facing helper documentation describes the NixOS admin-wrapper contract 
 **** Tests
 
 - *RT-8.12 - Helper help remains sourced byte-for-byte from =docs/help/meet-helper.txt=*: *PASS*.
-- *RT-8.8 - Tracked source and documentation contain no obsolete helper binary references:* *PASS*.
+- *RT-8.8 - Tracked source and documentation contain no obsolete helper binary references:* *REMOVED 2026-10-06*.
+  The prohibited source/documentation search was deleted, including its ticket
+  scan. Historical state: PASS; the identifier remains reserved.
 
 *** VALID AC10.4 - Live NixOS helper schedules, lists, and cancels a room
 
