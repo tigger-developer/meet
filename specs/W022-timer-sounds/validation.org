@@ -45,3 +45,22 @@
   not passed. Independent review cannot be invoked under the current mandatory
   preconditions; the unrelated failures require a separate authorized change.
 - Live evidence :: No browser or deployment verification performed.
+
+* Local checks 2026-10-06
+- Candidate :: =55511a51619781ec1faeef42629ab385efe52d7a=, timer sounds and
+  playback-bound microphone muting, with a clean working tree before checks.
+- Environment :: macOS arm64; Go 1.27.1 after the standard shell bootstrap.
+  Build, module and scanner caches were isolated in an operating-system
+  temporary directory.
+- Build :: =make build= exited 0. =go version -m bin/meet= confirms Go 1.27.1,
+  the candidate revision above and =vcs.modified=false=.
+- Security :: =govulncheck ./...= exited 0: "No vulnerabilities found."
+  This supersedes the 2026-10-03 security result for the local candidate
+  compiled with this toolchain; it does not establish deployed-binary safety.
+- Regression :: =make test= exited 2. =go vet ./...= passed and all 43 timer
+  regression functions passed. RT-8.8 - no obsolete helper references and
+  RT-19.6 - bounded create preview failed with the same archived-reference
+  and expired-fixture outcomes recorded above.
+- Remaining prerequisite :: The repository-wide regression check has not
+  passed. Delivery review remains blocked by those two existing failures.
+- Live evidence :: Browser user tests remain AMBER. No deployment performed.

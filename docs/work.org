@@ -90,8 +90,9 @@ classification; it is provenance, not current state.
 - *Specification:* [[file:../specs/W022-timer-sounds/spec.org][W022 - Timer sounds and microphone muting]].
 - *Validation:* [[file:../specs/W022-timer-sounds/validation.org][W022 - Timer sound validation]].
 - *Audit evidence:* [[file:../specs/W022-timer-sounds/audits.yaml][W022 - Independent audit records]].
-- *Blocker:* Repository-wide regression and security checks fail; see the
-  validation record for the two existing test failures and Go toolchain findings.
+- *Blocker:* Repository-wide regression checks still fail on the two existing
+  tests. The 2026-10-06 security scan with Go 1.27.1 passes; the earlier Go
+  toolchain findings remain historical evidence in the validation record.
 
 ** TODO W002 - Chat filename uses epoch date when startTimestamp is missing :defect:legacy:
 :PROPERTIES:
