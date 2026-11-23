@@ -79,6 +79,18 @@ classification; it is provenance, not current state.
 
 * Work items
 
+** ACTIVE W023 - Direct builds with canonical embedded help :defect:
+:PROPERTIES:
+:CUSTOM_ID: w-023
+:PRIORITY: P1
+:SOURCE: BYPASS-GATE-7 emergency request
+:CREATED: 2026-11-23
+:END:
+
+- Reserved for the direct-build help packaging repair.
+- RT9.3 - Inline-help source search is retired; its identifier remains reserved.
+  Behavioural CLI output tests remain in use.
+
 ** BLOCKED W022 - Timer sounds and playback-bound microphone muting :feature:
 :PROPERTIES:
 :CUSTOM_ID: w-022
