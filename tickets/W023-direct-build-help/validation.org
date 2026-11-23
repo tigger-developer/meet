@@ -1,0 +1,48 @@
+#+TITLE: W023 - Direct build validation
+#+STARTUP: overview
+#+TODO: AMBER RED | GREEN
+
+* Environment
+2026-11-23; macOS arm64; Go 1.27.4.
+Implementation candidate: =3eaee3a=.
+Temporary checkouts: =meet-help-build.uZAqL5pwV3/red= and
+=meet-help-build.uZAqL5pwV3/green= under the operating-system temporary directory.
+Go build and module caches were isolated there.
+
+* Results
+** GREEN AT023.1 - Fresh checkout build :testdef:
+:PROPERTIES:
+:REVISION: 3eaee3a
+:COMMAND: go build ./cmd/meet ./cmd/meet-helper
+:EVIDENCE: First build command in a fresh local clone exited zero; help tests and go vet passed; git status --porcelain was empty afterwards.
+:END:
+Baseline =6f724d8= failed this direct-build acceptance command with missing
+=help-cancel.txt= and =help.txt= embed patterns. This was the observed build
+interface failure, not compilation of a test harness. No Make target ran
+before either fresh-checkout direct build. Subsequent =make build= also passed.
+
+** GREEN AT023.2 - CLI preservation :testdef:
+:PROPERTIES:
+:REVISION: 3eaee3a
+:COMMAND: go test ./tests/regression -run 'TestMeetHelp|TestHelper' -count=1 -v
+:EVIDENCE: Existing help and helper tests passed. Baseline versus candidate executable comparison passed all 18 cases, including exact stdout, stderr and exit status.
+:END:
+Baseline executables were built with the original Makefile only after its
+direct-build failure had been observed. Both executable sets used the same
+Go toolchain. The canonical help text was unchanged.
+
+** AMBER UT023.1 - Deployment retry :testdef:
+:PROPERTIES:
+:REASON: Infrastructure deployment retry and installed-help user validation remain pending.
+:END:
+
+* Additional checks and limitations
+- =go vet ./...= passed.
+- =make vulncheck= passed: no vulnerabilities found.
+- =git diff --check= passed.
+- =go test ./...= exited non-zero solely for
+  =TestCLI_Create_PreviewBounded_RT19_6=: the September 2026 fixture has no
+  upcoming occurrences on 2026-11-23. This pre-existing schedule fixture is
+  outside the help packaging repair and is not reported as a passing suite.
+- No remote deployment or SSH operation was performed.
+- [[file:audits.yaml][Review evidence]] records the bounded emergency assessment.

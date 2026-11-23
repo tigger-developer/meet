@@ -79,7 +79,7 @@ classification; it is provenance, not current state.
 
 * Work items
 
-** ACTIVE W023 - Direct builds with canonical embedded help :defect:
+** REVIEW W023 - Direct builds with canonical embedded help :defect:
 :PROPERTIES:
 :CUSTOM_ID: w-023
 :PRIORITY: P1
@@ -87,7 +87,10 @@ classification; it is provenance, not current state.
 :CREATED: 2026-11-23
 :END:
 
-- Reserved for the direct-build help packaging repair.
+- *Specification:* [[file:../tickets/W023-direct-build-help/spec.org][W023 - Direct build help packaging]].
+- *Validation:* [[file:../tickets/W023-direct-build-help/validation.org][W023 - Build and CLI evidence]].
+- *Audit evidence:* [[file:../tickets/W023-direct-build-help/audits.yaml][W023 - Self-review records]].
+- Deployment retry and user acceptance remain pending.
 - RT9.3 - Inline-help source search is retired; its identifier remains reserved.
   Behavioural CLI output tests remain in use.
 
