@@ -9,29 +9,16 @@ BUILD_OUTPUT := ./bin/$(APP)
 CONFIG_PATH  := config/localhost.yaml
 SECRETS_PATH := secrets/localhost.yaml
 
-.PHONY: build test test-one-off lint clean install uninstall init serve sync
+.PHONY: build test test-one-off lint vulncheck clean install uninstall init serve sync
 
-build: stage-help-text
+build:
 	@echo "==> building $(APP) for $$(go env GOOS)/$$(go env GOARCH)"
 	@mkdir -p $(dir $(BUILD_OUTPUT))
 	go build -o $(BUILD_OUTPUT) $(MAIN_PKG)
 	go build -o ./bin/meet-helper ./cmd/meet-helper
 	@ls -la $(BUILD_OUTPUT) ./bin/meet-helper
 
-# stage-help-text copies the canonical help-text sources from docs/help/ into
-# each binary's package directory where Go's embed directive can reach them.
-# The staged copies are gitignored; edit docs/help/<binary>.txt and rebuild.
-.PHONY: stage-help-text
-stage-help-text:
-	@cp docs/help/meet-helper.txt cmd/meet-helper/help.txt
-	@cp docs/help/meet.txt cmd/meet/help-meet.txt
-	@cp docs/help/meet-serve.txt cmd/meet/help-serve.txt
-	@cp docs/help/meet-token.txt cmd/meet/help-token.txt
-	@cp docs/help/meet-create.txt cmd/meet/help-create.txt
-	@cp docs/help/meet-cancel.txt cmd/meet/help-cancel.txt
-	@cp docs/help/meet-list.txt cmd/meet/help-list.txt
-
-test: stage-help-text lint
+test: lint
 	@echo "==> running regression tests"
 	@if ! find tests/regression -name '*_test.go' -print -quit 2>/dev/null | grep -q .; then \
 	  echo "WARNING: no regression tests found in tests/regression/"; \
@@ -46,9 +33,12 @@ else
 	go test ./tests/one_off/... -v
 endif
 
-lint: stage-help-text
+lint:
 	@echo "==> linting"
 	go vet ./...
+
+vulncheck:
+	govulncheck ./...
 
 clean:
 	rm -rf ./bin

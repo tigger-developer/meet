@@ -31,19 +31,6 @@ func ensureMeetHelperBin(t *testing.T) string {
 	}
 	repoRoot := filepath.Clean(filepath.Join(cwd, "..", ".."))
 
-	// Stage the help-text source into the binary's package dir so Go's
-	// //go:embed directive can reach it. The Makefile build target does
-	// this; we replicate it here so `go test` works standalone.
-	helpSrc := filepath.Join(repoRoot, "docs", "help", "meet-helper.txt")
-	helpDst := filepath.Join(repoRoot, "cmd", "meet-helper", "help.txt")
-	helpData, err := os.ReadFile(helpSrc)
-	if err != nil {
-		t.Fatalf("read help source %s: %v", helpSrc, err)
-	}
-	if err := os.WriteFile(helpDst, helpData, 0o644); err != nil {
-		t.Fatalf("stage help.txt: %v", err)
-	}
-
 	out := filepath.Join(repoRoot, "bin", "meet-helper-test")
 	cmd := exec.Command("go", "build", "-o", out, "./cmd/meet-helper")
 	cmd.Dir = repoRoot

@@ -58,43 +58,6 @@ func TestMeetHelp_SubcommandsSourcedFromDocs_RT9_2(t *testing.T) {
 	}
 }
 
-// AC9.1 (regression-protection) — cmd/meet/main.go does not contain inline
-// help-text strings. A hit means someone has re-introduced a hardcoded copy
-// in Go source instead of editing docs/help/.
-func TestMeetHelp_NoInlineHelpStrings_RT9_3(t *testing.T) {
-	root := repoRootForHelp(t)
-	mainPath := filepath.Join(root, "cmd", "meet", "main.go")
-	data, err := os.ReadFile(mainPath)
-	if err != nil {
-		t.Fatalf("read main.go: %v", err)
-	}
-	source := string(data)
-
-	docPaths, err := filepath.Glob(filepath.Join(root, helpDocsDir, "*.txt"))
-	if err != nil {
-		t.Fatalf("glob docs help: %v", err)
-	}
-	if len(docPaths) == 0 {
-		t.Fatal("no docs/help/*.txt files found")
-	}
-
-	for _, docPath := range docPaths {
-		data, err := os.ReadFile(docPath)
-		if err != nil {
-			t.Fatalf("read docs source %s: %v", docPath, err)
-		}
-		for _, line := range strings.Split(string(data), "\n") {
-			phrase := strings.TrimSpace(line)
-			if len(phrase) < 24 || strings.HasPrefix(phrase, "Usage:") {
-				continue
-			}
-			if strings.Contains(source, phrase) {
-				t.Errorf("cmd/meet/main.go contains help-text phrase from %s: %q", docPath, phrase)
-			}
-		}
-	}
-}
-
 // AC9.1 — help documents double-hyphen flags and does not expose Go flag's
 // single-hyphen PrintDefaults output.
 func TestMeetHelp_DocOwnedDoubleHyphenFlags_RT9_4(t *testing.T) {

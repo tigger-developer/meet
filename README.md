@@ -1,7 +1,7 @@
 ---
 title: meet
-version: 1.2
-last-updated: 2026-10-03
+version: 1.3
+last-updated: 2026-11-23
 ---
 
 # meet
@@ -67,11 +67,16 @@ supplying the canonical deploy-time config cascade automatically.
 
 ### Makefile targets
 
+Both commands also build directly from a fresh checkout with
+`go build ./cmd/meet ./cmd/meet-helper`. The Go package in `docs/help/`
+embeds the canonical text files directly; no help staging step is required.
+
 ```
 make build          # build meet and meet-helper binaries
 make serve          # build and run with local config
 make token ROOM=x   # generate a moderator JWT URL for a room
 make test           # lint + regression tests
+make vulncheck      # scan Go dependencies with installed govulncheck
 make install        # symlink meet and meet-helper to ~/.local/bin
 make sync           # git add/commit/pull/push
 ```
@@ -226,6 +231,9 @@ Deployed via `deploy-app` from the hetzner deploy toolchain. The Makefile
 contains local dev targets only - no deploy, SSH, or systemd targets.
 
 ## Changelog
+
+- 2026-11-23: Embed canonical CLI help directly for builds from published tags;
+  expose the Go dependency scan as `make vulncheck`.
 
 - **1.2, 2026-10-03:** Replaced timer sounds, made pause silent, restored full
   application volume and tied microphone restoration to playback completion.

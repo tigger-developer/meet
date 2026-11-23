@@ -4,20 +4,13 @@
 package main
 
 import (
-	_ "embed"
 	"fmt"
 	"os"
 	"os/exec"
 
+	helptext "github.com/tigger-developer/meet/docs/help"
 	"github.com/tigger-developer/meet/internal/sshshim"
 )
-
-// helpText is copied from docs/help/meet-helper.txt by the Makefile build
-// target. Editing the inline copy here is unsupported — edit the docs
-// source and rebuild.
-//
-//go:embed help.txt
-var helpText string
 
 // Version is the build identifier, overridden at link time.
 var Version = "dev"
@@ -74,7 +67,7 @@ func main() {
 }
 
 func printUsage(out *os.File) {
-	fmt.Fprint(out, helpText)
+	fmt.Fprint(out, helptext.Helper)
 }
 
 func containsHelpFlag(args []string) bool {

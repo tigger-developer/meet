@@ -1,5 +1,5 @@
 // ABOUTME: meet entrypoint. Subcommands serve the app and manage rooms.
-// ABOUTME: Help prose is sourced from docs/help and staged at build time.
+// ABOUTME: Help prose is sourced from docs/help and embedded directly.
 
 package main
 
@@ -7,7 +7,6 @@ import (
 	"context"
 	"crypto/rsa"
 	"crypto/x509"
-	_ "embed"
 	"encoding/pem"
 	"flag"
 	"fmt"
@@ -20,32 +19,10 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	helptext "github.com/tigger-developer/meet/docs/help"
 	"github.com/tigger-developer/meet/internal/server"
 	"gopkg.in/yaml.v3"
 )
-
-// Help text is copied from docs/help/meet*.txt into this package directory
-// by the Makefile stage-help-text target before build. The canonical
-// sources live in docs/help/; the staged copies here are gitignored. Do
-// not edit the *.txt files in this directory — edit docs/help/ and rebuild.
-
-//go:embed help-meet.txt
-var helpMeet string
-
-//go:embed help-serve.txt
-var helpServe string
-
-//go:embed help-token.txt
-var helpToken string
-
-//go:embed help-create.txt
-var helpCreate string
-
-//go:embed help-cancel.txt
-var helpCancel string
-
-//go:embed help-list.txt
-var helpList string
 
 // Version is the build identifier, overridden at link time.
 var Version = "dev"
@@ -154,13 +131,13 @@ func main() {
 }
 
 func printUsage() {
-	fmt.Fprint(os.Stderr, helpMeet)
+	fmt.Fprint(os.Stderr, helptext.Meet)
 }
 
 func runServe(args []string) {
 	fs := flag.NewFlagSet("serve", flag.ExitOnError)
 	fs.Usage = func() {
-		fmt.Fprint(os.Stderr, helpServe)
+		fmt.Fprint(os.Stderr, helptext.Serve)
 	}
 	versionFlag := fs.Bool("version", false, "print version and exit")
 	configFlag := fs.String("config", "", "comma-separated config files (default: auto from env)")
@@ -330,7 +307,7 @@ func runServe(args []string) {
 func runToken(args []string) {
 	fs := flag.NewFlagSet("token", flag.ExitOnError)
 	fs.Usage = func() {
-		fmt.Fprint(os.Stderr, helpToken)
+		fmt.Fprint(os.Stderr, helptext.Token)
 	}
 	configFlag := fs.String("config", "", "comma-separated config files (default: auto from env)")
 	roomFlag := fs.String("room", "", "room name (required)")
@@ -557,7 +534,7 @@ func parsePrivateKey(pemStr string) *rsa.PrivateKey {
 func runCreate(args []string) {
 	fs := flag.NewFlagSet("create", flag.ExitOnError)
 	fs.Usage = func() {
-		fmt.Fprint(os.Stderr, helpCreate)
+		fmt.Fprint(os.Stderr, helptext.Create)
 	}
 	configFlag := fs.String("config", "", "comma-separated config files (default: auto from env)")
 	roomFlag := fs.String("room", "", "room name (required)")
@@ -843,7 +820,7 @@ func parseDateOnly(raw string) (time.Time, error) {
 func runCancel(args []string) {
 	fs := flag.NewFlagSet("cancel", flag.ExitOnError)
 	fs.Usage = func() {
-		fmt.Fprint(os.Stderr, helpCancel)
+		fmt.Fprint(os.Stderr, helptext.Cancel)
 	}
 	configFlag := fs.String("config", "", "comma-separated config files (default: auto from env)")
 	roomFlag := fs.String("room", "", "room name (required)")
@@ -878,7 +855,7 @@ func runCancel(args []string) {
 func runList(args []string) {
 	fs := flag.NewFlagSet("list", flag.ExitOnError)
 	fs.Usage = func() {
-		fmt.Fprint(os.Stderr, helpList)
+		fmt.Fprint(os.Stderr, helptext.List)
 	}
 	configFlag := fs.String("config", "", "comma-separated config files (default: auto from env)")
 	filterFlag := fs.String("filter", "current", "current | all | active | upcoming | past | cancelled")
