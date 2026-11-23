@@ -76,7 +76,7 @@ state changes are respected. Playback errors release ownership; missing mute
 confirmation skips playback and logs an error instead of guessing the state.
 The external API cannot distinguish an unchanged mute state reasserted by a
 moderator. Sound mapping and live validation are defined in
-[W022 - Timer sounds](../specs/W022-timer-sounds/spec.org).
+[W022 - Timer sounds](../tickets/W022-timer-sounds/spec.org).
 
 ### Webhook (`POST /webhook/recording`)
 
